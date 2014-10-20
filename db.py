@@ -33,6 +33,7 @@ def init_db():
     client = MongoClient()
     return client[settings.db_name]
 
+# db contains the db connection
 db = init_db()
 
 
