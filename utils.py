@@ -1,4 +1,5 @@
 import datetime
+import random
 import numpy as np
 from uuid import uuid1
 
@@ -20,3 +21,30 @@ def to_int(v):
 
 def uuid():
     return str(uuid1())
+
+
+def draw(function):
+    """Function domain has to be a subdomain of [0,1]
+    It uniformely draws a value in 0, 1 and if x > draw its
+    a success, otherwise its a failure"""
+    def f(**kwargs):
+        rand = random.random()
+        x = function(**kwargs)
+        if rand < x:
+            return 1
+        else:
+            return 0
+    return f
+
+
+def hyperplane(**kwargs):
+    return float(sum(kwargs.values())) / len(kwargs)
+
+
+@draw
+def hyperplane_draw(**kwargs):
+    return float(sum(kwargs.values())) / len(kwargs)
+
+print hyperplane(a=1, b=0)
+a = np.array([])
+print hyperplane_draw(a=1, b=0)

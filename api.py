@@ -4,6 +4,7 @@ import random
 import requests
 import settings
 import utils
+import time
 from abba.stats import Experiment as ABExperiment
 from distributions import generate_random_from_feature
 from distributions import get_default_params
@@ -145,26 +146,37 @@ class AZTesting(ApiBase):
             self.uuid = uuid
         else:
             self.uuid = utils.uuid()
-        # TODO: load the initial db
         self.features = features
         # Dataset of tuples (point, result)
         self.datapoints = []
-        self._current_best_score = None
-        self._current_best_point = None
-        # self._load_schema()
+        self._load_schema()
 
-    # TODO: Data loading + schema creation
     def _load_schema(self):
         r = requests.get(schema_url + self.uuid)
-        print "REQUEST: ", r
-        return r
-        # schema = r.json()
-        # print schema
+        # If the schema exists
+        if 'error' not in r.json():
+            schema = r.json()
+            if schema['features']:
+                self.features = schema['features']
+            return r.json()
+        # Otherwise we create a new schema with no features
+        else:
+            r = requests.post(schema_url + self.uuid,
+                              # TODO: fixme
+                              data=json.dumps({'features': {}}),
+                              headers=headers)
+            return self._load_schema()
+
+    def __del__(self):
+        r = requests.delete(schema_url + self.uuid)
 
     def add_feature(self, feature_name, distribution, **kwargs):
-        feature_dict = {'distribution': distribution,
-                        'params': kwargs.get('params', {}),
-                        'default': kwargs.get('default', 0)}
+        """Adds the feature name and the distribution in feature set"""
+        feature_dict = {
+            'distribution': distribution,
+            'params': kwargs.get('params', get_default_params(distribution)),
+            'default': kwargs.get('default', 0)
+        }
         requests.post(feature_url + self.uuid,
                       data=json.dumps({feature_name: feature_dict}),
                       headers=headers)
@@ -172,6 +184,7 @@ class AZTesting(ApiBase):
         return self.features
 
     def remove_feature(self, feature_name, **kwargs):
+        """Removes the feature name of the feature set"""
         requests.delete(feature_url + self.uuid,
                         data=json.dumps({'feature_name': feature_name}),
                         headers=headers)
@@ -179,52 +192,77 @@ class AZTesting(ApiBase):
         return self.features
 
     def get_candidate(self, **kwargs):
+        """Returns the next candidate to try"""
         r = requests.get(base_url + self.uuid)
         return r.json()
 
     def save_result(self, point, result, **kwargs):
+        """Saves the point with its associated result"""
         self.datapoints.append((point, result))
         data = point.copy()
         data['result'] = result
         requests.post(base_url + self.uuid,
                       data=json.dumps(data),
                       headers=headers)
-        if (not self._current_best_score) or result > self._current_best_score:
-            self._current_best_score = result
-            self._current_best_point = point
         return self.datapoints
 
-ab = ABTesting('test')
-ab.add_feature('a0', 'binary')
-ab.add_feature('a1', 'binary')
-ab.add_feature('a2', 'binary')
-print ab.add_feature('a3', 'binary')
-baseline = ab.get_candidate()
-point = ab.get_candidate()
-print baseline
+az1 = AZTesting('test')
+print az1.features
+print az1.get_candidate()
+az = AZTesting('test6')
+del az
+az = AZTesting('test6')
+az.add_feature('a1', 'binary')
+az.add_feature('a2', 'binary')
+az.add_feature('a3', 'binary')
+az.add_feature('a4', 'binary')
+az.add_feature('a5', 'binary')
+print az.features
+point = az.get_candidate()
+
+for _ in range(100):
+    az.save_result(point, random.randint(0, 1))
 print point
 
-for _ in range(30):
-    ab.save_result(baseline, 1)
-for _ in range(170):
-    ab.save_result(baseline, 0)
+ppoint = az.get_candidate()
+print ppoint
+for _ in range(100):
+    az.save_result(ppoint, random.randint(0, 1))
 
-for _ in range(50):
-    ab.save_result(point, 1)
-for _ in range(150):
-    ab.save_result(point, 0)
+print len(az.datapoints)
+del az
 
-next_point =  ab.get_candidate()
-print "NEXT POINT"
-print next_point
-for _ in range(40):
-    ab.save_result(next_point, 1)
-for _ in range(160):
-    ab.save_result(next_point, 0)
-
-nnext_point = ab.get_candidate()
-
-print baseline
-print point
-print next_point
-print nnext_point
+# ab = ABTesting('test')
+# ab.add_feature('a0', 'binary')
+# ab.add_feature('a1', 'binary')
+# ab.add_feature('a2', 'binary')
+# print ab.add_feature('a3', 'binary')
+# baseline = ab.get_candidate()
+# point = ab.get_candidate()
+# print baseline
+# print point
+#
+# for _ in range(30):
+#     ab.save_result(baseline, 1)
+# for _ in range(170):
+#     ab.save_result(baseline, 0)
+#
+# for _ in range(50):
+#     ab.save_result(point, 1)
+# for _ in range(150):
+#     ab.save_result(point, 0)
+#
+# next_point =  ab.get_candidate()
+# print "NEXT POINT"
+# print next_point
+# for _ in range(40):
+#     ab.save_result(next_point, 1)
+# for _ in range(160):
+#     ab.save_result(next_point, 0)
+#
+# nnext_point = ab.get_candidate()
+#
+# print baseline
+# print point
+# print next_point
+# print nnext_point

@@ -63,7 +63,13 @@ def write_schema(uuid, features):
 
 
 def get_schema(uuid):
+    """Given an uuid, it returns the schema of this uuid"""
     return db['schemas'].find_one({'uuid': uuid})
+
+
+def delete_schema(uuid):
+    """Given an uuid, it deletes the schema associated to this uuid"""
+    return db['schemas'].remove({'uuid': uuid})
 
 # -----------------------
 #       Features
@@ -92,9 +98,20 @@ def remove_feature(uuid, feature_name):
 # -----------------------
 
 def write_datapoint(uuid, features, result):
-    """Given an uuid and a sequence of features, it writes the point in the db"""
+    """Given an uuid and a sequence of features, it writes
+    the point in the db"""
     data = {'uuid': uuid,
             'features': features,
             'result': result,
             'time': utils.now()}
     return db['datapoints'].insert(data)
+
+
+def delete_datapoints(uuid):
+    """Given an uuid it deletes all the datapoints"""
+    return db['datapoints'].remove({'uuid': uuid})
+
+def get_datapoints(uuid):
+    """Given an uuid it returns all the datapoints"""
+    print db['datapoints'].find({'uuid': uuid})
+    return db['datapoints'].find({'uuid': uuid})
