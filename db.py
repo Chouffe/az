@@ -28,6 +28,7 @@
 import settings
 import utils
 from pymongo import MongoClient
+import numpy as np
 
 
 def init_db():
@@ -111,7 +112,7 @@ def delete_datapoints(uuid):
     """Given an uuid it deletes all the datapoints"""
     return db['datapoints'].remove({'uuid': uuid})
 
+
 def get_datapoints(uuid):
-    """Given an uuid it returns all the datapoints"""
-    print db['datapoints'].find({'uuid': uuid})
+    """Given an uuid it returns all the datapoints associated with it"""
     return db['datapoints'].find({'uuid': uuid})

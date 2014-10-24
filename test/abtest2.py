@@ -2,33 +2,6 @@ import utils
 import api
 
 
-def format_results(explored_points, number_trials, number_binary_features, best_point, features_to_show=[]):
-    """Formats nicely the results of an experiment"""
-    n = 0
-    for i, p in enumerate(explored_points):
-        if p == best_point:
-            n = i
-    print "-------------------------"
-    print "Results of the Experiment"
-    print "-------------------------"
-    print
-    print "Explored points: ", len(explored_points)
-    print "Number trials: ", number_trials
-    print "Number features: ", number_binary_features
-    print
-    print "Initial point: ", explored_points[0]
-    for f in features_to_show:
-        print f, ": ", explored_points[0][f]
-    print "Best point: ", best_point
-    for f in features_to_show:
-        print f, ": ", best_point[f]
-    print "Number of iterations: ", n
-    print
-    print "Path taken: "
-    for p in explored_points:
-        print p
-
-
 def run_experiment(objective_function, number_points_to_try, number_trials, number_binary_features, features_to_show=[]):
 
     # Initialize the ab testing
@@ -49,9 +22,9 @@ def run_experiment(objective_function, number_points_to_try, number_trials, numb
             score = objective_function(**point_to_try)
             ab.save_result(point_to_try, score)
 
-    format_results(explored_points, number_trials,
-                   number_binary_features, ab._current_baseline_point,
-                   features_to_show)
+    utils.format_results(explored_points, number_trials,
+                         number_binary_features, ab._current_baseline_point,
+                         features_to_show)
 
 # -------------------
 # Set of experiments

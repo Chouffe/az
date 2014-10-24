@@ -77,6 +77,7 @@ class ABTesting(ApiBase):
         next_point = point.copy()
         selected_feature_name = random.choice(self.features.keys())
         # From 0 -> 1 and 1 -> 0
+        # Assumption: Binary distribution of the variable
         next_point[selected_feature_name] ^= 1
         return next_point
 
@@ -93,8 +94,9 @@ class ABTesting(ApiBase):
         """
         baseline_num_successes, baseline_num_trials = self._get_successes_and_trials(self._current_baseline_point)
         num_successes, num_trials = self._get_successes_and_trials(self._current_variation_point)
-        print "BASELINE: ", baseline_num_successes, baseline_num_trials
-        print "VARIATION: ", num_successes, num_trials
+        # Debugging
+        # print "BASELINE: ", baseline_num_successes, baseline_num_trials
+        # print "VARIATION: ", num_successes, num_trials
         experiment = ABExperiment(num_variations,
                                   baseline_num_successes,
                                   baseline_num_trials,
@@ -106,8 +108,9 @@ class ABTesting(ApiBase):
 
     def _is_ab_test_success(self):
         p_value, rel_improvement = self._ab_test()
-        print "P VALUE: ", p_value
-        print "REL IMPROVEMENT: ", rel_improvement
+        # Debugging
+        # print "P VALUE: ", p_value
+        # print "REL IMPROVEMENT: ", rel_improvement
         # Basic heuristic to keep the variation over the baseline
         return p_value <= .05 and rel_improvement > 0
 
@@ -130,9 +133,9 @@ class ABTesting(ApiBase):
                 # Debugging
                 print "AB TEST SUCCESS"
                 self._current_baseline_point = self._current_variation_point
-            else:
+            # else:
                 # Debugging
-                print "AB TEST FAILURE"
+                # print "AB TEST FAILURE"
 
             self._current_variation_point = self._generate_next_point(self._current_baseline_point)
             return self._current_variation_point
@@ -171,8 +174,13 @@ class AZTesting(ApiBase):
                               headers=headers)
             return self._load_schema()
 
-    def __del__(self):
-        r = requests.delete(schema_url + self.uuid)
+    # def __del__(self):
+    #     """Deletes the entries in the DB"""
+    #     requests.delete(schema_url + self.uuid)
+
+    def delete(self):
+        """Deletes the entries in the DB"""
+        requests.delete(schema_url + self.uuid)
 
     def add_feature(self, feature_name, distribution, **kwargs):
         """Adds the feature name and the distribution in feature set"""
@@ -209,64 +217,3 @@ class AZTesting(ApiBase):
                       data=json.dumps(data),
                       headers=headers)
         return self.datapoints
-
-# az1 = AZTesting('test')
-# print az1.features
-# print az1.get_candidate()
-# az = AZTesting('test6')
-# del az
-# az = AZTesting('test6')
-# az.add_feature('a1', 'binary')
-# az.add_feature('a2', 'binary')
-# az.add_feature('a3', 'binary')
-# az.add_feature('a4', 'binary')
-# az.add_feature('a5', 'binary')
-# print az.features
-# point = az.get_candidate()
-#
-# for _ in range(100):
-#     az.save_result(point, random.randint(0, 1))
-# print point
-#
-# ppoint = az.get_candidate()
-# print ppoint
-# for _ in range(100):
-#     az.save_result(ppoint, random.randint(0, 1))
-#
-# print len(az.datapoints)
-# del az
-
-# ab = ABTesting('test')
-# ab.add_feature('a0', 'binary')
-# ab.add_feature('a1', 'binary')
-# ab.add_feature('a2', 'binary')
-# print ab.add_feature('a3', 'binary')
-# baseline = ab.get_candidate()
-# point = ab.get_candidate()
-# print baseline
-# print point
-#
-# for _ in range(30):
-#     ab.save_result(baseline, 1)
-# for _ in range(170):
-#     ab.save_result(baseline, 0)
-#
-# for _ in range(50):
-#     ab.save_result(point, 1)
-# for _ in range(150):
-#     ab.save_result(point, 0)
-#
-# next_point =  ab.get_candidate()
-# print "NEXT POINT"
-# print next_point
-# for _ in range(40):
-#     ab.save_result(next_point, 1)
-# for _ in range(160):
-#     ab.save_result(next_point, 0)
-#
-# nnext_point = ab.get_candidate()
-#
-# print baseline
-# print point
-# print next_point
-# print nnext_point
