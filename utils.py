@@ -31,8 +31,10 @@ def draw(function):
         rand = random.random()
         x = function(**kwargs)
         if rand < x:
+            # Success
             return 1
         else:
+            # Failure
             return 0
     return f
 
@@ -45,6 +47,7 @@ def hyperplane(**kwargs):
 def hyperplane_draw(**kwargs):
     return float(sum(kwargs.values())) / len(kwargs)
 
-print hyperplane(a=1, b=0)
-a = np.array([])
-print hyperplane_draw(a=1, b=0)
+
+@draw
+def obj_function_draw(a1, a2, a3, **kwargs):
+    return float(a1 + a2 + a3) / 3

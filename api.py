@@ -93,6 +93,8 @@ class ABTesting(ApiBase):
         """
         baseline_num_successes, baseline_num_trials = self._get_successes_and_trials(self._current_baseline_point)
         num_successes, num_trials = self._get_successes_and_trials(self._current_variation_point)
+        print "BASELINE: ", baseline_num_successes, baseline_num_trials
+        print "VARIATION: ", num_successes, num_trials
         experiment = ABExperiment(num_variations,
                                   baseline_num_successes,
                                   baseline_num_trials,
@@ -104,6 +106,8 @@ class ABTesting(ApiBase):
 
     def _is_ab_test_success(self):
         p_value, rel_improvement = self._ab_test()
+        print "P VALUE: ", p_value
+        print "REL IMPROVEMENT: ", rel_improvement
         # Basic heuristic to keep the variation over the baseline
         return p_value <= .05 and rel_improvement > 0
 
@@ -206,31 +210,31 @@ class AZTesting(ApiBase):
                       headers=headers)
         return self.datapoints
 
-az1 = AZTesting('test')
-print az1.features
-print az1.get_candidate()
-az = AZTesting('test6')
-del az
-az = AZTesting('test6')
-az.add_feature('a1', 'binary')
-az.add_feature('a2', 'binary')
-az.add_feature('a3', 'binary')
-az.add_feature('a4', 'binary')
-az.add_feature('a5', 'binary')
-print az.features
-point = az.get_candidate()
-
-for _ in range(100):
-    az.save_result(point, random.randint(0, 1))
-print point
-
-ppoint = az.get_candidate()
-print ppoint
-for _ in range(100):
-    az.save_result(ppoint, random.randint(0, 1))
-
-print len(az.datapoints)
-del az
+# az1 = AZTesting('test')
+# print az1.features
+# print az1.get_candidate()
+# az = AZTesting('test6')
+# del az
+# az = AZTesting('test6')
+# az.add_feature('a1', 'binary')
+# az.add_feature('a2', 'binary')
+# az.add_feature('a3', 'binary')
+# az.add_feature('a4', 'binary')
+# az.add_feature('a5', 'binary')
+# print az.features
+# point = az.get_candidate()
+#
+# for _ in range(100):
+#     az.save_result(point, random.randint(0, 1))
+# print point
+#
+# ppoint = az.get_candidate()
+# print ppoint
+# for _ in range(100):
+#     az.save_result(ppoint, random.randint(0, 1))
+#
+# print len(az.datapoints)
+# del az
 
 # ab = ABTesting('test')
 # ab.add_feature('a0', 'binary')
