@@ -107,12 +107,15 @@ class ABTesting(ApiBase):
         return p_value, rel_improvement.value
 
     def _is_ab_test_success(self):
-        p_value, rel_improvement = self._ab_test()
-        # Debugging
-        # print "P VALUE: ", p_value
-        # print "REL IMPROVEMENT: ", rel_improvement
-        # Basic heuristic to keep the variation over the baseline
-        return p_value <= .05 and rel_improvement > 0
+        try:
+            p_value, rel_improvement = self._ab_test()
+            # Debugging
+            # print "P VALUE: ", p_value
+            # print "REL IMPROVEMENT: ", rel_improvement
+            # Basic heuristic to keep the variation over the baseline
+            return p_value <= .05 and rel_improvement > 0
+        except ZeroDivisionError:
+            return False
 
     def get_candidate(self, **kwargs):
         """Returns the candidate point to try next"""

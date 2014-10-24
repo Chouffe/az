@@ -61,34 +61,80 @@ def obj_function_draw(a1, a2, a3, **kwargs):
 # ---------------------
 
 
-# TODO: add sequence of results. mean, std... foreach
-# TODO: add best score
-def format_results(explored_points, number_trials, number_binary_features,
-                   best_point, features_to_show=[]):
-    """Formats nicely the results of an experiment"""
-    n = 0
+def format_features_to_show(point, features_to_show):
+    if features_to_show:
+        print "Features: ", zip(features_to_show,
+                                [point[f] for f in features_to_show])
+
+
+def get_number_iterations_to_find_best_point(explored_points, best_point):
     for i, p in enumerate(explored_points):
         if p == best_point:
-            n = i
+            return i
+    # Raise an exception maybe?
+    return -1
+
+
+def format_results(explored_points,
+                   number_trials,
+                   number_features,
+                   datapoints,
+                   best_point,
+                   best_score,
+                   features_to_show=[]):
+    """Formats nicely the results of an experiment"""
+    n = get_number_iterations_to_find_best_point(explored_points, best_point)
     print "-------------------------"
     print "Results of the Experiment"
     print "-------------------------"
     print
     print "Explored points: ", len(explored_points)
     print "Number trials: ", number_trials
-    print "Number features: ", number_binary_features
+    print "Number features: ", number_features
     print
     print "Initial point: ", explored_points[0]
-    for f in features_to_show:
-        print f, ": ", explored_points[0][f]
+    format_features_to_show(explored_points[0], features_to_show)
+    print
     print "Best point: ", best_point
-    for f in features_to_show:
-        print f, ": ", best_point[f]
-    print "Number of iterations: ", n
+    print "Score: ", best_score
+    format_features_to_show(best_point, features_to_show)
+    print
+    print "Number of iterations to converge to the best point: ", n
     print
     print "Path taken: "
     for p in explored_points:
         print p
+
+
+# TODO: add sequence of results. mean, std... foreach
+def format_multiple_results(results, features_to_show=[]):
+    """Given a sequence of results, it formats them
+    results is a seq of
+    - explored_points
+    - number_trials
+    - number_features
+    - datapoints
+    - best_point
+    - best_score
+    """
+    best_score_array = np.array([])
+    for r in results:
+        print r
+        print r[-1]
+        best_score_array = np.append(best_score_array, r[-1])
+
+    print "BEST SCORE ARRAY", best_score_array
+    print "Best Score"
+    print "Mean: ", best_score_array.mean()
+    print "Std: ", best_score_array.std()
+
+# ---------------------
+# AB Testing processing
+# ---------------------
+
+
+def number_successes_trials_to_score(number_successes, number_trials):
+    return float(number_successes) / number_trials
 
 
 # ---------------------
