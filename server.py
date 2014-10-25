@@ -14,6 +14,17 @@ def next_point(uuid):
     on the current schema and the already seen datapoints
     eg. {feature1: value1, feature2: value2, ...}"""
     schema = db.get_schema(uuid)
+    # --------------------------------------------
+    # TODO
+    # - Generate new points to try
+    # - Fit a model based on the data already seen
+    #    -> For now a random forest
+    #    -> Extend to any Regressor by boostraping
+    #         -> Implement my own bootstraping method
+    # - Predict the best points to try next
+    #    -> Exploration vs exploitation
+    # - Return the best one
+    # --------------------------------------------
     # Debugging
     # print "SCHEMA: ", schema
     # Returns a random point drown form the schema distribution
