@@ -14,8 +14,10 @@ def next_point(uuid):
     on the current schema and the already seen datapoints
     eg. {feature1: value1, feature2: value2, ...}"""
     schema = db.get_schema(uuid)
-    print "SCHEMA: ", schema
-    return json.dumps(ml.random_search(schema['features']))
+    # Debugging
+    # print "SCHEMA: ", schema
+    # Returns a random point drown form the schema distribution
+    return json.dumps(ml.random_search(schema['features'])[0])
 
 
 @app.route('/api/<string:uuid>', methods=['POST'])
