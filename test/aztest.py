@@ -64,5 +64,7 @@ for i in range(N):
 # results = run_experiment(utils.obj_function_draw, 100, 200, 100, feature_distributions=itertools.repeat('uniform'))
 # utils.format_results(*results, features_to_show=['a1', 'a2', 'a3'])
 
+# run_experiment(utils.obj_function_draw, 100, 200, 40)
+
 # TODO: Save results somewhere
 utils.format_multiple_results(results)

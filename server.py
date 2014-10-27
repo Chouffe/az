@@ -4,6 +4,7 @@ import json
 import db
 import ml
 import data_handling
+import generator
 
 app = flask.Flask(__name__)
 
@@ -13,10 +14,13 @@ def next_point(uuid):
     """Given the uuid of the schema, it returns the next_point based
     on the current schema and the already seen datapoints
     eg. {feature1: value1, feature2: value2, ...}"""
-    schema = db.get_schema(uuid)
     # --------------------------------------------
     # TODO
     # - Generate new points to try
+    #     -> Be smarter about it
+    #     - Annealing
+    #     - Generative models
+    #     - Hill climbing methods
     # - Fit a model based on the data already seen
     #    -> For now a random forest
     #    -> Extend to any Regressor by boostraping
@@ -25,10 +29,25 @@ def next_point(uuid):
     #    -> Exploration vs exploitation
     # - Return the best one
     # --------------------------------------------
-    # Debugging
-    # print "SCHEMA: ", schema
-    # Returns a random point drown form the schema distribution
-    return json.dumps(ml.random_search(schema['features'])[0])
+    # Returns a random point drawn form the schema distribution
+    schema = db.get_schema(uuid)
+    features = schema['features']
+    dataset = data_handling.datapoints_to_dataset(db.get_datapoints(uuid))
+    train, target = data_handling.dataset_to_matrix(features, dataset)
+    gen = generator.RandomGenerator(features)
+    points_to_try = gen.get(n=100)
+
+    if len(dataset) > settings.min_points_for_smbo:
+        # Fits a ML Model to predict the best point to try next
+        vectors = data_handling.points_to_vectors(points_to_try, features)
+        train, target = data_handling.dataset_to_matrix(features, dataset)
+        scores, importances = ml.score_points(train, target, vectors)
+        # Need to sort in reverse because we are maximizing the objective function
+        top_ei, top_vector = sorted(zip(scores, vectors), key=lambda x: x[0], reverse=True)[0]
+        return json.dumps(data_handling.vector_to_point(top_vector, features))
+    # Returns a random point
+    else:
+        return json.dumps(points_to_try[0])
 
 
 @app.route('/api/<string:uuid>', methods=['POST'])
@@ -64,7 +83,7 @@ def save_point(uuid):
 def get_schema(uuid):
     """Returns the schema"""
     schema = db.get_schema(uuid)
-    print "SCHEMA: ", schema
+    # print "SCHEMA: ", schema
     if not schema:
         return json.dumps({'error': 'No schema with uuid: %s' % uuid})
     else:
@@ -74,7 +93,10 @@ def get_schema(uuid):
 
 @app.route('/api/schema/<string:uuid>', methods=['POST'])
 def create_schema(uuid):
-    """Creates a schema"""
+    """Creates a schema given the features
+    Input:
+        - features
+    """
     data = flask.request.json
     if not data:
         flask.abort(400)  # bad request
@@ -100,7 +122,7 @@ def delete_schema(uuid):
 def add_feature(uuid):
     """Adds a new feature"""
     data = flask.request.json
-    print "DATA:", data
+    # print "DATA:", data
     if not data:
         flask.abort(400)  # bad request
     try:
@@ -116,7 +138,6 @@ def remove_feature(uuid):
     """Adds a new feature"""
     data = flask.request.json
     if not data or not data.get('feature_name', None):
-        flask.abort(400)  # bad request
     db.remove_feature(uuid, data['feature_name'])
 
 

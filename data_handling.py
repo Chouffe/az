@@ -55,30 +55,18 @@ def datapoints_to_dataset(datapoints):
             for _, d in point_dict.items()]
 
 
-# --------------------------------------
-# Tests
-# --------------------------------------
-
-datapoints = db.get_datapoints('aztest')
-features = db.get_schema('aztest')['features']
-dataset = datapoints_to_dataset(db.get_datapoints('aztest'))
-train, target = dataset_to_matrix(features, dataset)
-random_points = np.array(ml.random_search(features, 10))
-
-
 def point_to_vector(point, features):
     """Given a point {feature1: value1, ..., featureN: valueN}
     It returns [value1, ..., valueN] sorted by the keys"""
     return [point[key] for key in sorted(features.keys())]
 
-print map(lambda p: point_to_vector(p, features), random_points)
 
-print dataset
-print features
-print train, target
+def points_to_vectors(points, features):
+    return map(lambda p: point_to_vector(p, features), points)
 
-print ml.score_points(train,
-                      target,
-                      map(lambda p: point_to_vector(p, features),
-                          random_points))
-# TODO: keep only the N best ones
+
+def vector_to_point(vector, features):
+    """Given a vector [value1, ..., valueN]
+    It returns {feature1: value1, ..., featureN: valueN}"""
+    return {key: vector[i] for i, key
+            in enumerate(sorted(features.keys()))}

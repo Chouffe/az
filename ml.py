@@ -88,11 +88,3 @@ def score_points(train, target, sample_points):
     mu, sigma = random_forest_evaluate(rf, sample_points)
     scores = expected_improvement(target.min(), mu, sigma)
     return scores, rf.feature_importances_
-
-# Testing
-# train = np.array([[1, 1], [1, 0], [0, 1], [0, 0]])
-# target = np.array([0, 1, 1, 0])
-#
-# rf = rf_factory()
-# rf.fit(train, target)
-# print score_points(train, target, np.array([[0, 0]]))

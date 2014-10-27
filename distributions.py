@@ -71,6 +71,6 @@ def generate_random(distribution_type, params, n):
     distribution = DISTRIBUTIONS[distribution_type](**params)
     return distribution.generate(n)
 
+
 def generate_random_from_feature(feature):
-    print feature
     return generate_random(feature['distribution'], feature['params'], 1)[0]
