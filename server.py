@@ -6,7 +6,9 @@ import ml
 import data_handling
 import generator
 
-app = flask.Flask(__name__)
+app = flask.Flask(__name__,
+                  static_folder='static',
+                  static_url_path='')
 
 
 @app.route('/api/<string:uuid>', methods=['GET'])
@@ -138,7 +140,13 @@ def remove_feature(uuid):
     """Adds a new feature"""
     data = flask.request.json
     if not data or not data.get('feature_name', None):
-    db.remove_feature(uuid, data['feature_name'])
+        db.remove_feature(uuid, data['feature_name'])
+
+
+@app.route('/', methods=['GET'])
+def homepage():
+    return flask.redirect(flask.url_for('static',
+                                        filename='index.html'))
 
 
 if __name__ == '__main__':
