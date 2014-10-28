@@ -1,120 +1,35 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-        <style>
-
-            svg {
-                padding:25px;
-            }
-            path {
-                fill: none;
-                stroke: #c00;
-                stroke-width: 3px;
-            }
-            g line {
-                stroke-width: 1px;
-                stroke: #333;
-                stroke-opacity: 0.4;
-                shape-rendering: crispedges;
-            }
-            g text {
-                color: black;
-            }
-
-            svg .point {
-                stroke: black;
-                stroke-width: 2px;
-                fill: #fff;
-            }
-
-            svg .max {
-                stroke: black;
-                stroke-width: 2px;
-                fill: #339CFF;
-            }
-
-        </style>
+        <link rel='stylesheet' type='text/css' href='css/graph.css'/>
     </head>
     <body>
-        <div id="chart"></div>
+        <h2>Convergence over time</h2>
+        <div id="charts"></div>
+
+        <div id="objective-function">
+            <h2>Objective Function</h2>
+        </div>
+
+        <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+        <script src="js/graph.js" charset="utf-8"></script>
+
         <script>
-            var data  = [3,7,9,1,4,6,8,2,5,4,5,6,3,2,4,9,14,12,3,4]
-            var w     = 1000
-            var h     = 500
-            var max   = d3.max(data)
+            // Todo: Make a chart for each variable
+        var data = {
+            'a0': [3,7,9,1,4,6],
+            'a1': [3,7,9,1,4,10,1,2,3,4],
+            'a2': [3,7,9,1,4,6],
+            'a3': [3,7,9,1,4,6],
+            'a4': [3,7,9,1,4,6],
+            'a5': [3,7,9,1,4,6],
+        };
 
-            var x  = d3.scale.linear().domain([0, data.length - 1]).range([0, w])
-            var y  = d3.scale.linear().domain([0, max]).range([h, 0])
-
-            var vis = d3.select('#chart')
-            .append('svg:svg')
-            .attr('width', w)
-            .attr('height', h)
-
-            vis.selectAll('path.line')
-            .data([data])
-            .enter().append("svg:path")
-            .attr("d", d3.svg.line().x(function (d, i) { return x(i); }).y(function (d) { return y(d); }))
-
-            vis.append("svg:text")
-            .text("Objective Function")
-            .attr('dy', 18)
-            .attr('dx', -4)
-            .attr('text-anchor', 'end')
-            .attr('transform', "rotate(270)")
-            .attr("class", "domain");
-
-            vis.append("svg:text")
-            .text("Time")
-            .attr('dy', h - 5)
-            .attr('dx', w - 5)
-            .attr('text-anchor', 'end')
-            .attr("class", "domain");
-
-            ticks = vis.selectAll('.tick')
-            .data(y.ticks(7))
-            .enter().append('svg:g')
-            .attr('transform', function (d) {  return "translate(0, " + y(d) + ")"; })
-            .attr('class', 'tick')
-
-            ticks2 = vis.selectAll('.tick2')
-            .data(x.ticks(data.length))
-            .enter().append('svg:g')
-            .attr('transform', function (d, i) {  return "translate(" + x(i) + ", 0)"; })
-            .attr('class', 'tick2')
-
-            ticks.append('svg:line')
-            .attr('y1', 0)
-            .attr('y2', 0)
-            .attr('x1', 0)
-            .attr('x2', w)
-
-            ticks2.append('svg:line')
-            .attr('y1', 0)
-            .attr('y2', h)
-            .attr('x1', 0)
-            .attr('x2', 0)
-
-            ticks.append('svg:text')
-            .text(function (d) { return d; })
-            .attr('text-anchor', 'end')
-            .attr('dy', 2)
-            .attr('dx', -4)
-
-            ticks2.append('svg:text')
-            .text(function (d) { return d; })
-            .attr('text-anchor', 'end')
-            .attr('dy', h + 20)
-            .attr('dx', 4)
-
-            vis.selectAll('.point')
-            .data(data)
-            .enter().append("svg:circle")
-            .attr("class", function (d, i) { if (d == max) { return 'point max'; } else { return 'point'; }})
-            .attr("cx", function (d, i) { return x(i); })
-            .attr("cy", function (d) { return y(d); })
-            .attr("r", function (d, i) { if (d == max) { return 10; } else { return 6; }})
+        for(var varName in data) {
+            ydata = data[varName];
+            xdata = range(ydata.length);
+            drawChart(xdata, ydata, "draw #", varName, "#charts");
+        }
 
         </script>
     </body>

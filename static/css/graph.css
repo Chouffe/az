@@ -1,0 +1,52 @@
+h2 {
+    text-align: center;
+}
+
+#charts {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+}
+
+svg {
+    padding:25px;
+}
+
+path {
+    fill: none;
+    stroke: #c00;
+    stroke-width: 3px;
+}
+
+g line {
+    stroke-width: 1px;
+    stroke: #333;
+    stroke-opacity: 0.4;
+    shape-rendering: crispedges;
+}
+
+g text {
+    color: black;
+}
+
+svg .tick text,
+svg .tick2 text
+{
+    font-size: 12px;
+}
+
+svg .point {
+    stroke: black;
+    stroke-width: 2px;
+    fill: #fff;
+}
+
+svg .max {
+    stroke: black;
+    stroke-width: 2px;
+    fill: #339CFF;
+}
+
+svg .domain {
+    font-weight: bold;
+}
