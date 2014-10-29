@@ -56,6 +56,16 @@ def hyperplane_draw(**kwargs):
 def obj_function_draw(a1, a2, a3, **kwargs):
     return float(a1 + a2 + a3) / 3
 
+
+@draw
+def obj_function_2_draw(a1, a2, a3, **kwargs):
+    return float(a1 - a2 + 2*a3)/ 3
+
+
+@draw
+def obj_function_3_draw(a1, a2, a3, a4, **kwargs):
+    return float(a1 - a2 + 2*a3 -2*a4)/ 3
+
 # ---------------------
 #     Formatting
 # ---------------------
@@ -164,10 +174,13 @@ def process_datapoints(datapoints):
     ddata = [p for p in datapoints]
     for point in ddata:
         point_dict[hash_datapoint(point)] = {'results': [],
+                                             'time': [],
                                              'features': point['features']}
 
     for point in ddata:
         point_dict[hash_datapoint(point)]['results'].append(point['result'])
+        point_dict[hash_datapoint(point)]['time'].append(point['time'])
+
 
     for e in point_dict:
         result_array = np.array(point_dict[e]['results'])

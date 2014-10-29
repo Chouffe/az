@@ -8,12 +8,13 @@ def run_experiment(objective_function,
                    number_points_to_try,
                    number_trials,
                    number_features,
+                   uuid='aztest',
                    feature_distributions=[]):
 
     # Initialize the az testing
-    az = api.AZTesting('aztest')
+    az = api.AZTesting(uuid)
     az.delete()
-    az = api.AZTesting('aztest')
+    az = api.AZTesting(uuid)
     explored_points = []
 
     # Default distributions: binary
@@ -36,7 +37,7 @@ def run_experiment(objective_function,
             az.save_result(point_to_try, score)
 
     # Get the best point so far
-    datapoints = db.get_datapoints('aztest')
+    datapoints = db.get_datapoints(uuid)
     point_dict = utils.process_datapoints(datapoints)
     sorted_points = utils.sort_point_dict(point_dict)
 
@@ -55,16 +56,17 @@ def run_experiment(objective_function,
 # Set of experiments
 # -------------------
 
-results = []
-N = 100
-for i in range(N):
-    print "Running experiment #", i
-    results.append(run_experiment(utils.obj_function_draw, 5, 200, 40))
+# results = []
+# N = 100
+# for i in range(N):
+#     print "Running experiment #", i
+#     results.append(run_experiment(utils.obj_function_draw, 5, 200, 40))
 # run_experiment(utils.hyperplane_draw, 16, 200, 5)
 # results = run_experiment(utils.obj_function_draw, 100, 200, 100, feature_distributions=itertools.repeat('uniform'))
 # utils.format_results(*results, features_to_show=['a1', 'a2', 'a3'])
 
-# run_experiment(utils.obj_function_draw, 100, 200, 40)
+# run_experiment(utils.obj_function_2_draw, 150, 200, 40, 'aztest1', itertools.repeat('uniform'))
+run_experiment(utils.obj_function_3_draw, 500, 200, 40, uuid='aztest2', feature_distributions=itertools.repeat('uniform'))
 
 # TODO: Save results somewhere
-utils.format_multiple_results(results)
+# utils.format_multiple_results(results)

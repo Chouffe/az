@@ -149,5 +149,29 @@ def homepage():
                                         filename='index.html'))
 
 
+@app.route('/api/graph/results/<string:uuid>', methods=['GET'])
+def results_graph(uuid):
+    datapoints = db.get_datapoints(uuid)
+    data = data_handling.datapoints_to_graph_results(datapoints)
+    return json.dumps(data)
+
+
+@app.route('/api/graph/obj/<string:uuid>', methods=['GET'])
+def results_objective_function(uuid):
+    datapoints = [d for d in db.get_datapoints(uuid)]
+    features = datapoints[0]['features'].keys()
+    dataset = data_handling.datapoints_to_dataset(datapoints)
+    results = dict()
+
+    for f in features:
+        results[f] = {'x': [], 'y': []}
+
+    for f in features:
+        for p in dataset:
+            results[f]['x'].append(p[f])
+            results[f]['y'].append(p['_obj'])
+
+    return json.dumps(results)
+
 if __name__ == '__main__':
     app.run(port=settings.server_port)
