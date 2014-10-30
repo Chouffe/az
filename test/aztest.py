@@ -66,7 +66,8 @@ def run_experiment(objective_function,
 # utils.format_results(*results, features_to_show=['a1', 'a2', 'a3'])
 
 # run_experiment(utils.obj_function_2_draw, 150, 200, 40, 'aztest1', itertools.repeat('uniform'))
-run_experiment(utils.obj_function_3_draw, 500, 200, 40, uuid='aztest2', feature_distributions=itertools.repeat('uniform'))
+# run_experiment(utils.obj_function_5, 200, 30, 20, uuid='srv2', feature_distributions=itertools.repeat('uniform'))
+run_experiment(utils.obj_function_9, 500, 10, 3, uuid='yo4', feature_distributions=itertools.repeat('uniform'))
 
 # TODO: Save results somewhere
 # utils.format_multiple_results(results)

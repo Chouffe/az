@@ -5,6 +5,7 @@ import db
 import ml
 import data_handling
 import generator
+import requests
 
 app = flask.Flask(__name__,
                   static_folder='static',
@@ -16,6 +17,8 @@ def next_point(uuid):
     """Given the uuid of the schema, it returns the next_point based
     on the current schema and the already seen datapoints
     eg. {feature1: value1, feature2: value2, ...}"""
+    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+    base_url = "http://localhost:%s/service/predict/" % settings.ml_service_port
     # --------------------------------------------
     # TODO
     # - Generate new points to try
@@ -43,10 +46,22 @@ def next_point(uuid):
         # Fits a ML Model to predict the best point to try next
         vectors = data_handling.points_to_vectors(points_to_try, features)
         train, target = data_handling.dataset_to_matrix(features, dataset)
-        scores, importances = ml.score_points(train, target, vectors)
+
+        r = requests.post(base_url + uuid,
+                          data=json.dumps({'points': points_to_try}),
+                          headers=headers)
+        # TODO: Finish
+        tmp = r.json()
+        mu = tmp['mu']
+        sigma = tmp['sigma']
+        # print "TMP: ", tmp
+
+        scores = ml.score_mu_sigma(target, mu, sigma)
+
+        # scores, importances = ml.score_points(train, target, vectors)
         # Need to sort in reverse because we are maximizing the objective function
-        top_ei, top_vector = sorted(zip(scores, vectors), key=lambda x: x[0], reverse=True)[0]
-        return json.dumps(data_handling.vector_to_point(top_vector, features))
+        top_ei, top_point = sorted(zip(scores, points_to_try), key=lambda x: x[0], reverse=True)[0]
+        return json.dumps(top_point)
     # Returns a random point
     else:
         return json.dumps(points_to_try[0])
@@ -138,15 +153,29 @@ def add_feature(uuid):
 @app.route('/api/feature/<string:uuid>', methods=['DELETE'])
 def remove_feature(uuid):
     """Adds a new feature"""
+    print "TEST"
     data = flask.request.json
+    print data
     if not data or not data.get('feature_name', None):
+        flask.abort(400)  # bad request
+    else:
         db.remove_feature(uuid, data['feature_name'])
+        return json.dumps({'error': None})
 
 
 @app.route('/', methods=['GET'])
 def homepage():
-    return flask.redirect(flask.url_for('static',
-                                        filename='index.html'))
+    return flask.redirect(flask.url_for('static', filename='index.html'))
+
+
+@app.route('/new', methods=['GET'])
+def experiment_new():
+    return flask.redirect(flask.url_for('static', filename='new.html'))
+
+
+@app.route('/results/<string:uuid>', methods=['GET'])
+def experiment_results(uuid):
+    return flask.redirect(flask.url_for('static', filename='results.html'))
 
 
 @app.route('/api/graph/results/<string:uuid>', methods=['GET'])

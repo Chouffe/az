@@ -76,6 +76,13 @@ def random_forest_evaluate(rf, sample_points):
     return mu, sigma
 
 
+def score_mu_sigma(target, mu, sigma):
+    mu = np.array(mu)
+    sigma = np.array(sigma)
+    scores = expected_improvement(target.min(), mu, sigma)
+    return scores
+
+
 def score_points(train, target, sample_points):
     """
     Given training data and the results for that data,

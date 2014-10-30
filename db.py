@@ -6,7 +6,7 @@
 #   - uuid
 #     eg: "experiment1"
 #   - features
-#     Sequence of
+#     Dict of
 #     - feature-name -> {"default", "distribution", "params"}
 #       - default: default value
 #       - distribution: in #{"normal", "uniform", "uniform_descrete", "binary"}

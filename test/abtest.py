@@ -44,10 +44,10 @@ def run_experiment(objective_function,
 
 # run_experiment(utils.hyperplane_draw, 20, 200, 10)
 results = []
-N = 10
+N = 100
 for i in range(N):
     print "Running experiment #", i
-    results.append(run_experiment(utils.obj_function_draw, 5, 200, 40))
+    results.append(run_experiment(utils.obj_function_draw, 50, 200, 40))
 
 utils.format_results(*results[0], features_to_show=['a1', 'a2', 'a3'])
 utils.format_multiple_results(results)

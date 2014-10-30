@@ -59,12 +59,36 @@ def obj_function_draw(a1, a2, a3, **kwargs):
 
 @draw
 def obj_function_2_draw(a1, a2, a3, **kwargs):
-    return float(a1 - a2 + 2*a3)/ 3
+    return float(a1 - a2 + 2*a3) / 3
 
 
 @draw
 def obj_function_3_draw(a1, a2, a3, a4, **kwargs):
-    return float(a1 - a2 + 2*a3 -2*a4)/ 3
+    return float(a1 - a2 + 2 * a3 - 2 * a4) / 3
+
+
+def obj_function_4(a1, a2, a3, a4, **kwargs):
+    return float(a1 + a2 + a3 + a4) / 4 + noise(sigma=.5)
+
+
+def obj_function_5(a1, a2, **kwargs):
+    return float(np.sinc(a1-.5) + np.sinc(a2 - .25)) / 2 + noise(sigma=.1)
+
+
+def obj_function_6(a1, a2, **kwargs):
+    return float(np.sinc(a1-.5) + np.sinc(a2 - .25)) / 2 + noise(sigma=.1)
+
+
+def obj_function_7(a1, **kwargs):
+    return float(np.sinc(a1 - .5)) + noise(sigma=.2)
+
+
+def obj_function_8(a1, **kwargs):
+    return float(np.sinc(6 * (a1 - .5))) + noise(sigma=.2)
+
+
+def obj_function_9(a1, a2, **kwargs):
+    return float(np.sinc(6 * (a1 - .5))) + noise(sigma=.2)
 
 # ---------------------
 #     Formatting
