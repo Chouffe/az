@@ -6,6 +6,7 @@ import ml
 import data_handling
 import generator
 import requests
+import random
 
 app = flask.Flask(__name__,
                   static_folder='static',
@@ -38,32 +39,30 @@ def next_point(uuid):
     schema = db.get_schema(uuid)
     features = schema['features']
     dataset = data_handling.datapoints_to_dataset(db.get_datapoints(uuid))
-    train, target = data_handling.dataset_to_matrix(features, dataset)
+
     gen = generator.RandomGenerator(features)
-    points_to_try = gen.get(n=100)
+    number_points_to_try = random.randint(10, 100)
+    points_to_try = gen.get(n=number_points_to_try)
 
     if len(dataset) > settings.min_points_for_smbo:
-        # Fits a ML Model to predict the best point to try next
-        vectors = data_handling.points_to_vectors(points_to_try, features)
         train, target = data_handling.dataset_to_matrix(features, dataset)
 
         r = requests.post(base_url + uuid,
                           data=json.dumps({'points': points_to_try}),
                           headers=headers)
-        # TODO: Finish
-        tmp = r.json()
-        mu = tmp['mu']
-        sigma = tmp['sigma']
-        # print "TMP: ", tmp
+        request_results = r.json()
 
-        scores = ml.score_mu_sigma(target, mu, sigma)
+        scores = ml.score_mu_sigma(target,
+                                   request_results['mu'],
+                                   request_results['sigma'])
 
-        # scores, importances = ml.score_points(train, target, vectors)
-        # Need to sort in reverse because we are maximizing the objective function
-        top_ei, top_point = sorted(zip(scores, points_to_try), key=lambda x: x[0], reverse=True)[0]
+        order = True if settings.optimization_strategy == 'maximize' else False
+        top_ei, top_point = sorted(zip(scores, points_to_try),
+                                   key=lambda x: x[0],
+                                   reverse=order)[0]
         return json.dumps(top_point)
-    # Returns a random point
     else:
+        # Returns a random point
         return json.dumps(points_to_try[0])
 
 
@@ -152,9 +151,7 @@ def add_feature(uuid):
 @app.route('/api/feature/<string:uuid>', methods=['DELETE'])
 def remove_feature(uuid):
     """Adds a new feature"""
-    print "TEST"
     data = flask.request.json
-    print data
     if not data or not data.get('feature_name', None):
         flask.abort(400)  # bad request
     else:
@@ -179,25 +176,31 @@ def experiment_results(uuid):
 
 @app.route('/api/graph/results/<string:uuid>', methods=['GET'])
 def results_graph(uuid):
+    schema = db.get_schema(uuid)
+    features = schema['features']
     datapoints = db.get_datapoints(uuid)
-    data = data_handling.datapoints_to_graph_results(datapoints)
+    data = data_handling.datapoints_to_graph_results(datapoints, features)
     return json.dumps(data)
 
 
+# TODO: add color scale for better visualization
+# Insight of the convergence
 @app.route('/api/graph/obj/<string:uuid>', methods=['GET'])
 def results_objective_function(uuid):
     datapoints = [d for d in db.get_datapoints(uuid)]
-    features = datapoints[0]['features'].keys()
+    schema = db.get_schema(uuid)
+    features = schema['features']
     dataset = data_handling.datapoints_to_dataset(datapoints)
-    results = dict()
 
-    for f in features:
-        results[f] = {'x': [], 'y': []}
+    results = {f: {'x': [], 'y': []} for f in features}
 
     for f in features:
         for p in dataset:
-            results[f]['x'].append(p[f])
             results[f]['y'].append(p['_obj'])
+            if f in p:
+                results[f]['x'].append(p[f])
+            else:
+                results[f]['x'].append(features[f]['default'])
 
     return json.dumps(results)
 

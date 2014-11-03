@@ -3,6 +3,8 @@ import api
 import itertools
 import random
 import db
+import objective_functions
+import data_handling
 
 aztestname = 'test_api'
 
@@ -74,6 +76,56 @@ def test_get_candidate_after_adding_features():
     number_features = random.randint(1, 10)
     az = generate_aztest(number_features)
     point = az.get_candidate()
-    az.add_feature('test', 'normal')
+    az.add_feature('other-feature', 'normal')
     point = az.get_candidate()
     assert len(point.keys()) == number_features + 1
+
+
+def add_points(az, n):
+    for _ in range(n):
+        point = az.get_candidate()
+        value = objective_functions.hyperplane(**point)
+        az.save_result(point, value)
+    return az
+
+
+@with_setup(setup_function, teardown_function)
+def test_add_points():
+    number_features = random.randint(1, 10)
+    az = generate_aztest(number_features)
+    number_points = random.randint(1, 10)
+    add_points(az, number_points)
+
+    assert len([p for p in db.get_datapoints(aztestname)]) == number_points
+
+
+@with_setup(setup_function, teardown_function)
+def test_get_graphs_results_after_adding_features():
+    number_features = random.randint(1, 10)
+    az = generate_aztest(number_features)
+    number_points = random.randint(1, 10)
+    add_points(az, number_points)
+
+    az.add_feature('other-feature', 'uniform')
+    schema = db.get_schema(aztestname)
+    features = schema['features']
+    datapoints = db.get_datapoints(aztestname)
+    data = data_handling.datapoints_to_graph_results(datapoints, features)
+
+    assert len(data) == number_features
+
+
+@with_setup(setup_function, teardown_function)
+def test_get_proj_results_after_adding_features():
+    number_features = random.randint(1, 10)
+    az = generate_aztest(number_features)
+    number_points = random.randint(1, 10)
+    add_points(az, number_points)
+
+    az.add_feature('other-feature', 'uniform')
+    schema = db.get_schema(aztestname)
+    features = schema['features']
+    datapoints = db.get_datapoints(aztestname)
+    data = data_handling.datapoints_to_graph_results(datapoints, features)
+
+    assert len(data) == number_features

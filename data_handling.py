@@ -56,19 +56,23 @@ def datapoints_to_dataset(datapoints):
             for _, d in point_dict.items()]
 
 
-def datapoints_to_graph_results(datapoints):
+def datapoints_to_graph_results(datapoints, features):
     point_dict = utils.process_datapoints(datapoints)
-    features = point_dict.values()[0]['features'].keys()
     tmp = [dict(m['features'].items() +
                 {'time': sorted(m['time'])[-1]}.items())
            for _, m in point_dict.items()]
     tmp = sorted(tmp, key=lambda d: d['time'])
     results = dict()
+
     for f in features:
         results[f] = []
+
     for e in tmp:
         for f in features:
-            results[f].append(e[f])
+            if f in e:
+                results[f].append(e[f])
+            else:
+                results[f].append(features[f]['default'])
 
     return results
 
