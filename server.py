@@ -139,7 +139,6 @@ def delete_schema(uuid):
 def add_feature(uuid):
     """Adds a new feature"""
     data = flask.request.json
-    # print "DATA:", data
     if not data:
         flask.abort(400)  # bad request
     try:

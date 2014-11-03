@@ -29,6 +29,7 @@ import settings
 import utils
 from pymongo import MongoClient
 import numpy as np
+import distributions
 
 
 def init_db():
@@ -80,6 +81,16 @@ def delete_schema(uuid):
 def add_feature(uuid, feature):
     """Given an uuid and a feature, it adds the feature to the schema"""
     schema = get_schema(uuid)
+
+    feature_dict = feature.items()[0][1]
+    distribution = feature_dict['distribution']
+
+    if not feature_dict['params']:
+        feature_dict['params'] = distributions.get_default_params(distribution)
+
+    if not feature_dict['default']:
+        feature_dict['default'] = 0
+
     new_feature_set = dict(schema['features'].items() + feature.items())
     return db['schemas'].update({'uuid': uuid},
                                 {"$set": {"features": new_feature_set}})

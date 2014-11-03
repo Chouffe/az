@@ -10,41 +10,36 @@ import data_handling
 service = flask.Flask(__name__)
 
 
-def cache_model(get_model):
+def cache_model(seconds):
+    """A decorator to cache the models"""
 
-    max_cache = 5  # 5 s caching
-    models_dict = {}
+    def wrap(get_model):
+        models_dict = {}
 
-    def f(uuid):
-        if uuid in models_dict:
-            if (utils.now() - models_dict[uuid]['date']).seconds < max_cache:
-                print "OK"
+        def f(uuid, features):
+
+            if (uuid in models_dict and
+                'date' in models_dict[uuid] and
+                'features' in models_dict[uuid] and
+                (utils.now() - models_dict[uuid]['date']).seconds < seconds and
+                models_dict[uuid]['features'] == features):
                 return models_dict[uuid]['model']
+
             else:
-                # Retrain the model in another process asynchronously
-                # Return the current model
-                # TODO:
-                print "KO2"
                 models_dict[uuid] = {
-                    'model': get_model(uuid),
-                    'date': utils.now()
+                    'model': get_model(uuid, features),
+                    'date': utils.now(),
+                    'features': features
                 }
                 return models_dict[uuid]['model']
-
-        else:
-            print "KO"
-            models_dict[uuid] = {'model': get_model(uuid), 'date': utils.now()}
-            return models_dict[uuid]['model']
-
-    return f
+        return f
+    return wrap
 
 
-@cache_model
-def get_model(uuid):
+@cache_model(5)
+def get_model(uuid, features):
     """Given a uuid, it trains a ML model based on the
     datapoints saved so far"""
-    schema = db.get_schema(uuid)
-    features = schema['features']
     dataset = data_handling.datapoints_to_dataset(db.get_datapoints(uuid))
     train, target = data_handling.dataset_to_matrix(features, dataset)
     rf = ml.rf_factory()
@@ -61,16 +56,32 @@ def predict(uuid):
     """
     schema = db.get_schema(uuid)
     data = flask.request.json
+
     if not data:
         flask.abort(400)  # bad request
 
-    # TODO: optimize
+    points = data['points']
+    featureNamesFromPoints = set(data['points'][0].keys())
+
     schema = db.get_schema(uuid)
     features = schema['features']
-    points = data['points']
+    featureSet = set(features.keys())
+
+    assert featureNamesFromPoints <= featureSet, \
+        "some features are not defined in the schema: %s" \
+        % str(featureNamesFromPoints - featureSet)
+
+    # filters features that are in both points and the schema
+    features = {f: features[f]
+                for f in features
+                if f in featureNamesFromPoints}
+
+    # Train a model on a given feature Set
+    rf = get_model(uuid, features)
+
+    # Transform vectors on the same feature set
     vectors = data_handling.points_to_vectors(points, features)
 
-    rf = get_model(uuid)
     mu, sigma = ml.random_forest_evaluate(rf, vectors)
     return json.dumps({'mu': list(mu), 'sigma': list(sigma)})
 

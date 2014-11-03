@@ -2,6 +2,30 @@ import utils
 import api
 import db
 import itertools
+import time
+
+
+def init_experiment(number_features, uuid='aztest', feature_distributions=[]):
+
+    az = api.AZTesting(uuid)
+
+    # Default distributions: binary
+    if not feature_distributions:
+        feature_distributions = itertools.repeat('binary')
+
+    # Add the features
+    for feature_name, d in zip(['a' + str(n)
+                                for n in range(1, number_features + 1)],
+                               feature_distributions):
+        # Only binary features for now
+        az.add_feature(feature_name, d)
+
+    return az
+
+
+def delete_experiment(uuid):
+    az = api.AZTesting(uuid)
+    az.delete()
 
 
 def run_experiment(objective_function,
@@ -11,25 +35,17 @@ def run_experiment(objective_function,
                    uuid='aztest',
                    feature_distributions=[]):
 
+    delete_experiment(uuid)
+    az = init_experiment(number_features,
+                         uuid=uuid,
+                         feature_distributions=feature_distributions)
+
     # Initialize the az testing
-    az = api.AZTesting(uuid)
-    az.delete()
-    az = api.AZTesting(uuid)
     explored_points = []
-
-    # Default distributions: binary
-    if not feature_distributions:
-        feature_distributions = itertools.repeat('binary')
-
-    # Add the features
-    for feature_name, d in zip(['a' + str(n)
-                                for n in range(1, number_features)],
-                               feature_distributions):
-        # Only binary features for now
-        az.add_feature(feature_name, d)
 
     # AZ/ Testing
     for _ in range(number_points_to_try):
+        # time.sleep(2)
         point_to_try = az.get_candidate()
         explored_points.append(point_to_try)
         for _ in range(number_trials):
@@ -67,7 +83,7 @@ def run_experiment(objective_function,
 
 # run_experiment(utils.obj_function_2_draw, 150, 200, 40, 'aztest1', itertools.repeat('uniform'))
 # run_experiment(utils.obj_function_5, 200, 30, 20, uuid='srv2', feature_distributions=itertools.repeat('uniform'))
-run_experiment(utils.obj_function_9, 500, 10, 3, uuid='yo4', feature_distributions=itertools.repeat('uniform'))
+run_experiment(utils.obj_function_9, 200, 50, 3, uuid='boo', feature_distributions=itertools.repeat('uniform'))
 
 # TODO: Save results somewhere
 # utils.format_multiple_results(results)

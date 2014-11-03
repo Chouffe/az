@@ -10,6 +10,7 @@ def api_preprocess_datapoint(data):
     return result, ddata
 
 
+# TODO: Test it
 def dataset_to_matrix(schema, dataset):
     """Given a schema and a dataset, it returns the
     training set and target set for the ml fitting

@@ -84,15 +84,15 @@
                                     <input type="text" class='form-control' placeholder='Feature Name' name="name" id="name" required>
                                 </td>
                                 <td>
+                                    <input type='text' name="default" class='form-control' placeholder='Default value'>
+                                </td>
+                                <td>
                                     <select name="distribution" class='form-control' required>
                                         <option value='binary'>binary</option>
                                         <option value='normal'>normal</option>
                                         <option value='uniform_discrete'>uniform discrete</option>
                                         <option>uniform</option>
                                     </select>
-                                </td>
-                                <td>
-                                    <input type='text' name="default" class='form-control' placeholder='Default value'>
                                 </td>
                                 <td>
                                     <input name='params' type='text' class='form-control' placeholder='parameters'>
@@ -199,6 +199,7 @@
                     if (defaults == "") {
                         defaults = 0;
                     }
+
                     if (params == "") {
                         params = {};
                     }
