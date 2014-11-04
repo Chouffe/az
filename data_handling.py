@@ -62,10 +62,7 @@ def datapoints_to_graph_results(datapoints, features):
                 {'time': sorted(m['time'])[-1]}.items())
            for _, m in point_dict.items()]
     tmp = sorted(tmp, key=lambda d: d['time'])
-    results = dict()
-
-    for f in features:
-        results[f] = []
+    results = {f: [] for f in features}
 
     for e in tmp:
         for f in features:

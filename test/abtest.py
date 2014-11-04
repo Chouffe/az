@@ -1,21 +1,55 @@
 import utils
 import api
+import objective_functions
+import itertools
+
+
+def init_experiment(number_features,
+                    uuid='abtest',
+                    feature_names=[],
+                    feature_distributions=[],
+                    feature_params=[]):
+
+    ab = api.ABTesting()
+
+    # Default distributions: binary
+    if not feature_distributions:
+        feature_distributions = itertools.repeat('binary')
+
+    if not feature_names:
+        feature_names = ['a' + str(n) for n in range(1, number_features + 1)]
+
+    if not feature_params:
+        feature_params = itertools.repeat(None)
+
+    # Add the features
+    for feature_name, d, params in zip(feature_names,
+                                       feature_distributions,
+                                       feature_params):
+        if params:
+            ab.add_feature(feature_name, d, params=params)
+        else:
+            ab.add_feature(feature_name, d)
+
+    return ab
 
 
 def run_experiment(objective_function,
                    number_points_to_try,
                    number_trials,
-                   number_binary_features):
+                   number_features,
+                   uuid='abtest',
+                   feature_names=[],
+                   feature_distributions=[],
+                   feature_params=[]):
 
     # Initialize the ab testing
-    ab = api.ABTesting()
+    ab = init_experiment(number_features,
+                         uuid=uuid,
+                         feature_names=feature_names,
+                         feature_distributions=feature_distributions,
+                         feature_params=feature_params)
     explored_points = []
-
-    # Add the features
-    for feature_name in ['a' + str(n)
-                         for n in range(1, number_binary_features)]:
-        # Only binary features for now
-        ab.add_feature(feature_name, "binary")
 
     # AB/Testing
     for _ in range(number_points_to_try):
@@ -33,7 +67,7 @@ def run_experiment(objective_function,
 
     return (explored_points,
             number_trials,
-            number_binary_features,
+            number_features,
             datapoints,
             best_point,
             best_score)
@@ -43,11 +77,51 @@ def run_experiment(objective_function,
 # -------------------
 
 # run_experiment(utils.hyperplane_draw, 20, 200, 10)
-results = []
-N = 100
-for i in range(N):
-    print "Running experiment #", i
-    results.append(run_experiment(utils.obj_function_draw, 50, 200, 40))
+# results = []
+# N = 1
+# for i in range(N):
+#     print "Running experiment #", i
+#     results.append(run_experiment(utils.obj_function_draw, 50, 200, 40))
+#
+# utils.format_results(*results[0], features_to_show=['a1', 'a2', 'a3'])
+# utils.format_multiple_results(results)
+#
+# Landing Page Experiment
+experiment_data = {
+    'objective_function': objective_functions.obj_function_landing_page,
+    'feature_names': [
+        "background",
+        "font_size",
+        "color",
+        "number_columns",
+        "popup"
+    ],
+    'feature_distributions': [
+        "uniform_discrete",
+        "uniform_discrete",
+        "uniform_discrete",
+        "uniform_discrete",
+        "binary"
+    ],
+    'feature_params': [
+        {'low': 0, 'high': 10},
+        {'low': 0, 'high': 15},
+        {'low': 0, 'high': 6},
+        {'low': 0, 'high': 10},
+        {}
+    ]
+}
 
-utils.format_results(*results[0], features_to_show=['a1', 'a2', 'a3'])
-utils.format_multiple_results(results)
+# Experiment 1 - Landing Page
+results = run_experiment(
+    objective_functions.obj_function_landing_page_draw,
+    500,
+    100,
+    len(experiment_data['feature_names']),
+    uuid='abtest',
+    feature_names=experiment_data['feature_names'],
+    feature_distributions=experiment_data['feature_distributions'],
+    feature_params=experiment_data['feature_params']
+)
+
+utils.format_results(*results)

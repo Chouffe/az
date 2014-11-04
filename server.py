@@ -40,6 +40,7 @@ def next_point(uuid):
     features = schema['features']
     dataset = data_handling.datapoints_to_dataset(db.get_datapoints(uuid))
 
+    # TODO: use annealing for instance
     gen = generator.RandomGenerator(features)
     number_points_to_try = random.randint(10, 100)
     points_to_try = gen.get(n=number_points_to_try)

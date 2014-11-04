@@ -5,6 +5,7 @@ import requests
 import settings
 import utils
 import time
+import generator
 from abba.stats import Experiment as ABExperiment
 from distributions import generate_random_from_feature
 from distributions import get_default_params
@@ -73,12 +74,20 @@ class ABTesting(ApiBase):
 
     def _generate_next_point(self, point):
         """Given a point, it generates the next one by
-        swaping a 0 -> 1 or 1-> 0"""
+        swaping a 0 -> 1 or 1-> 0 for binary distributions and by generating
+        a random point for other distributions"""
         next_point = point.copy()
+
         selected_feature_name = random.choice(self.features.keys())
-        # From 0 -> 1 and 1 -> 0
-        # Assumption: Binary distribution of the variable
-        next_point[selected_feature_name] ^= 1
+        selected_feature = self.features[selected_feature_name]
+
+        if selected_feature['distribution'] == 'binary':
+            # From 0 -> 1 and 1 -> 0
+            next_point[selected_feature_name] ^= 1
+        else:
+            rg = generator.RandomGenerator(self.features)
+            next_point[selected_feature_name] = rg.get_for_feature(selected_feature_name)[0]
+
         return next_point
 
     def _get_successes_and_trials(self, point):
@@ -96,7 +105,9 @@ class ABTesting(ApiBase):
         num_successes, num_trials = self._get_successes_and_trials(self._current_variation_point)
         # Debugging
         # print "BASELINE: ", baseline_num_successes, baseline_num_trials
+        # print self._current_baseline_point
         # print "VARIATION: ", num_successes, num_trials
+        # print self._current_variation_point
         experiment = ABExperiment(num_variations,
                                   baseline_num_successes,
                                   baseline_num_trials,
@@ -115,6 +126,7 @@ class ABTesting(ApiBase):
             # Basic heuristic to keep the variation over the baseline
             return p_value <= .05 and rel_improvement > 0
         except ZeroDivisionError:
+            print "Division by Zero"
             return False
 
     def get_candidate(self, **kwargs):

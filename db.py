@@ -9,7 +9,7 @@
 #     Dict of
 #     - feature-name -> {"default", "distribution", "params"}
 #       - default: default value
-#       - distribution: in #{"normal", "uniform", "uniform_descrete", "binary"}
+#       - distribution: in #{"normal", "uniform", "uniform_discrete", "binary"}
 #       - params: params required for the distribution
 #                 mu, sigma, low, high
 #     eg [{"btn-color" {"default": 0,

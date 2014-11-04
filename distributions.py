@@ -31,7 +31,7 @@ class UniformDistribution(Distribution):
 class UniformDiscreteDistribution(Distribution):
     def __init__(self, low=0, high=1):
         self.low = low
-        self.high = high
+        self.high = high + 1
 
     def generate(self, n=1):
         return np.random.randint(self.low, self.high, n)
