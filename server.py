@@ -184,6 +184,14 @@ def results_graph(uuid):
     return json.dumps(data)
 
 
+@app.route('/api/ab/graph/results/<string:uuid>', methods=['GET'])
+def ab_results_graph(uuid):
+    schema = db.get_schema(uuid)
+    features = schema['features']
+    datapoints = db.get_abdatapoints(uuid)
+    data = data_handling.datapoints_to_graph_results(datapoints, features)
+    return json.dumps(data)
+
 # TODO: add color scale for better visualization
 # Insight of the convergence
 @app.route('/api/graph/obj/<string:uuid>', methods=['GET'])

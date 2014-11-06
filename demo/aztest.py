@@ -3,7 +3,7 @@ import api
 import db
 import itertools
 import objective_functions
-import time
+import experiments
 
 
 def init_experiment(number_features,
@@ -125,15 +125,21 @@ experiment_data = {
 # utils.format_results(*results, features_to_show=['a1', 'a2', 'a3'])
 
 # Experiment 1 - Landing Page
-results = run_experiment(
-    objective_functions.obj_function_landing_page,
-    500,
-    100,
-    len(experiment_data['feature_names']),
-    uuid='lp2',
-    feature_names=experiment_data['feature_names'],
-    feature_distributions=experiment_data['feature_distributions'],
-    feature_params=experiment_data['feature_params']
-)
+# results = run_experiment(
+#     objective_functions.obj_function_landing_page,
+#     125,
+#     100,
+#     len(experiment_data['feature_names']),
+#     uuid='lp',
+#     feature_names=experiment_data['feature_names'],
+#     feature_distributions=experiment_data['feature_distributions'],
+#     feature_params=experiment_data['feature_params']
+# )
 
+# Experiment 1 - Landing Page
+# results = experiments.run(experiments.landing_page, run_experiment)
+# utils.format_results(*results)
+
+# Experiment 2 - Landing Page 2
+results = experiments.run(experiments.landing_page2, run_experiment)
 utils.format_results(*results)

@@ -24,11 +24,16 @@
 #   - result: result of the objective function
 #     eg: 12.3
 
+# - abdatapoints: Keeps the datapoints of the A/B tests
+#   - uuid: schema uuid
+#   - time: Date of when it was created
+#   - features
+#     {"btn-color" 0, "font-size" 12 ...}
+#   - result: result of the A/B test: 0 or 1
 
 import settings
 import utils
 from pymongo import MongoClient
-import numpy as np
 import distributions
 
 
@@ -127,3 +132,27 @@ def delete_datapoints(uuid):
 def get_datapoints(uuid):
     """Given an uuid it returns all the datapoints associated with it"""
     return db['datapoints'].find({'uuid': uuid})
+
+
+# -----------------------
+#      AB Datapoints
+# -----------------------
+
+def write_abdatapoint(uuid, features, result):
+    """Given an uuid and a sequence of features, it writes
+    the point in the db"""
+    data = {'uuid': uuid,
+            'features': features,
+            'result': result,
+            'time': utils.now()}
+    return db['abdatapoints'].insert(data)
+
+
+def delete_abdatapoints(uuid):
+    """Given an uuid it deletes all the datapoints"""
+    return db['abdatapoints'].remove({'uuid': uuid})
+
+
+def get_abdatapoints(uuid):
+    """Given an uuid it returns all the datapoints associated with it"""
+    return db['abdatapoints'].find({'uuid': uuid})

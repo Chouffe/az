@@ -47,6 +47,21 @@ def get_model(uuid, features):
     return rf
 
 
+@service.route('/service/feature-importances/<string:uuid>', methods=['GET'])
+def feature_importances(uuid):
+    """Given a uuid - It returns the feature importance
+    {feature1: value1, feature2: value2, ...}"""
+    schema = db.get_schema(uuid)
+    features = schema['features']
+
+    # Train/get a model on a given feature Set
+    rf = get_model(uuid, features)
+    feature_importances = rf.feature_importances_
+    keys = sorted(features.keys())
+    return json.dumps({key: feature_importances[i]
+                       for i, key in enumerate(keys)})
+
+
 @service.route('/service/predict/<string:uuid>', methods=['POST'])
 def predict(uuid):
     """Given a uuid and points

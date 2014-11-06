@@ -125,6 +125,16 @@
 
 
             <section>
+                <h2 id="ab-convergence">A/B Testing Comparison</h2>
+                <hr/>
+
+                <div id="ab-convergence-checkboxes"></div>
+                <div id="ab-charts"></div>
+            </section>
+
+
+
+            <section>
                 <h2 id="projections">Projections
 
                     <button id="projections-refresh" type="button" class="btn btn-default btn-lg pull-right">
@@ -140,6 +150,7 @@
 
         <script src="js/d3.min.js" charset="utf-8"></script>
         <script src="js/graph.js" charset="utf-8"></script>
+        <script src="js/jstat.js" charset="utf-8"></script>
         <script src="js/utils.js" charset="utf-8"></script>
         <script src="js/schema.js" charset="utf-8"></script>
         <script src="js/projection.js" charset="utf-8"></script>
@@ -173,6 +184,7 @@
                 uuid = $("#search-uuid").val();
                 loadSchema(uuid);
                 loadGraphData(uuid);
+                loadABGraphData(uuid);
                 loadObjectiveFunctionData(uuid);
                 return false;
             }

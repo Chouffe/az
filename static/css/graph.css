@@ -2,7 +2,9 @@ h2 {
     text-align: center;
 }
 
-#charts {
+#charts,
+#ab-charts
+{
     display: flex;
     flex-wrap: wrap;
     margin-bottom: 40px;

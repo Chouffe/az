@@ -61,6 +61,18 @@ function loadGraphData(uuid) {
     });
 }
 
+function loadABGraphData(uuid) {
+
+    $.get( "/api/ab/graph/results/" + uuid, function( dataString ) {
+        var data = $.parseJSON(dataString);
+        abGraphsData = data;
+        console.log(data);
+        plotABGraphsToDisplay();
+    });
+
+}
+
+
 function plotGraphsToDisplay() {
 
     cleanUpGraph();
@@ -78,8 +90,31 @@ function plotGraphsToDisplay() {
 
 }
 
+function plotABGraphsToDisplay() {
+
+    console.log('test');
+    cleanUpABGraph();
+    var features = getFeatures(abGraphsData);
+    console.log(features);
+
+    for(var i in features) {
+
+        varName = features[i];
+        if (graphDataToDisplay[varName]) {
+            ydata = abGraphsData[varName];
+            xdata = range(ydata.length);
+            drawChart(xdata, ydata, "draw #", varName, "#ab-charts");
+        }
+    }
+
+}
+
 function cleanUpGraph() {
     $("#charts .chart").remove();
+}
+
+function cleanUpABGraph() {
+    $("#ab-charts .chart").remove();
 }
 
 

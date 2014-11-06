@@ -1,11 +1,11 @@
 import abc
+import db
+import generator
 import json
 import random
 import requests
 import settings
 import utils
-import time
-import generator
 from abba.stats import Experiment as ABExperiment
 from distributions import generate_random_from_feature
 from distributions import get_default_params
@@ -158,6 +158,7 @@ class ABTesting(ApiBase):
     def save_result(self, point, result, **kwargs):
         """Given a point + result, it saves it to a dataset"""
         self.datapoints.append((point, result))
+        db.write_abdatapoint(self.uuid, point, result)
         return self.datapoints
 
 
