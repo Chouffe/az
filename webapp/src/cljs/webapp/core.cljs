@@ -5,10 +5,21 @@
             [webapp.components :as components]
             [webapp.routes :as routes]
             [figwheel.client :as fw :include-macros true]
+            [webapp.utils.ajax :as ajaxu]
             webapp.home
-            webapp.demo))
+            webapp.demo
+            [cljs-http.client :as http]
+            [cljs.core.async :refer [<!]])
+  (:require-macros [cljs.core.async.macros :refer [go]]))
+
 
 (enable-console-print!)
+
+;; TEST
+;; TODO: kill
+(go
+(let [response (<! (ajaxu/get-json "http://localhost:5002/api/lp2"))]
+  (println response)))
 
 (def tab->page
   {:home webapp.home/home-comp

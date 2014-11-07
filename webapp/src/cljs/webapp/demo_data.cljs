@@ -4,7 +4,7 @@
 (def data
   [{:uuid "demo1"
     :name "Demo 1"
-    :schema-id "test"
+    :schema-id "lp"
     :tests [{:uuid 1
              :title "A/Z testing"
              :type :az
@@ -18,7 +18,7 @@
                     :cost-function]}]}
    {:uuid "demo2"
     :name "Demo 2"
-    :schema-id "test2"
+    :schema-id "lp2"
     :tests [{:uuid 2
              :title "A/C testing"
              :type :az

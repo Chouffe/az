@@ -5,6 +5,7 @@
             [secretary.core :as secretary]
             [webapp.demo-data :as demo-data]
             [webapp.utils :as utils]
+            [webapp.services :as srv]
             [dommy.core :as dommy :refer-macros [sel sel1]]
             [webapp.components :as components]))
 
@@ -68,12 +69,34 @@
 
 (defn demo-results-comp
   []
-  (let [demo-uuid (demo/get-uuid)
-        {:keys [schema-id tests] :as demo}
-        (demo-data/get demo-uuid)]
-    [:div.container
-     [components/schema-component (schemas/get "test")]
-     [:div.row
-      (for [{:keys [uuid] :as test} tests]
-        ^{:key uuid}
-        [demo-results-test-comp test])]]))
+  (reagent/create-class
+    {:component-did-mount
+     (fn [_]
+       (let [demo-uuid (demo/get-uuid)
+             {:keys [schema-id]} (demo-data/get demo-uuid)]
+         (srv/load-schema schema-id)))
+
+     :render
+     (fn [_]
+       (let [demo-uuid (demo/get-uuid)
+             {:keys [schema-id tests] :as demo}
+             (demo-data/get demo-uuid)]
+         [:div.container
+          (pr-str demo)
+          (pr-str (schemas/get schema-id))
+          [components/schema-component schema-id]
+          [:div.row
+           (for [{:keys [uuid] :as test} tests]
+             ^{:key uuid}
+             [demo-results-test-comp test])]])
+       )
+     }
+    )
+  )
+
+;; Tests
+;; (srv/load-schema "lp")
+;; (srv/load-schema "lp")
+;; (srv/add-feature "lp" "b" {:distribution "uniform"
+;;                            :default 0
+;;                            :params {}})

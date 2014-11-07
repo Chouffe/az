@@ -7,6 +7,8 @@ import data_handling
 import generator
 import requests
 import random
+# TODO: kill
+from crossdomain import crossdomain
 
 app = flask.Flask(__name__,
                   static_folder='static',
@@ -14,6 +16,7 @@ app = flask.Flask(__name__,
 
 
 @app.route('/api/<string:uuid>', methods=['GET'])
+@crossdomain(origin="http://localhost:3449")
 def next_point(uuid):
     """Given the uuid of the schema, it returns the next_point based
     on the current schema and the already seen datapoints
@@ -97,6 +100,7 @@ def save_point(uuid):
 
 
 @app.route('/api/schema/<string:uuid>', methods=['GET'])
+@crossdomain(origin="http://localhost:3449")
 def get_schema(uuid):
     """Returns the schema"""
     schema = db.get_schema(uuid)
@@ -135,7 +139,9 @@ def delete_schema(uuid):
     return json.dumps({'error': None})
 
 
-@app.route('/api/feature/<string:uuid>', methods=['POST'])
+@app.route('/api/feature/<string:uuid>', methods=['POST', 'OPTIONS'])
+@crossdomain(origin="http://localhost:3449",
+    headers={'Content-type': 'application/json', 'Accept': 'text/plain'})
 def add_feature(uuid):
     """Adds a new feature"""
     data = flask.request.json
@@ -150,8 +156,9 @@ def add_feature(uuid):
 
 
 @app.route('/api/feature/<string:uuid>', methods=['DELETE'])
+@crossdomain(origin="http://localhost:3449")
 def remove_feature(uuid):
-    """Adds a new feature"""
+    """Deletes a new feature"""
     data = flask.request.json
     if not data or not data.get('feature_name', None):
         flask.abort(400)  # bad request

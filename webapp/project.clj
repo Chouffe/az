@@ -18,6 +18,8 @@
                              [org.clojure/clojurescript "0.0-2322"]
                              [figwheel "0.1.5-SNAPSHOT"]
                              [prismatic/dommy "1.0.0"]
+                             [cljs-http "0.1.20"]
+                             [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                              [secretary "1.2.0"]
                              [reagent "0.4.2"]]
               :plugins [;; Clojurescript plugins
