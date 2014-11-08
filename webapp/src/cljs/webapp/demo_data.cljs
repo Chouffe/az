@@ -14,23 +14,27 @@
             {:uuid 2
              :title "A/B testing"
              :type :ab
-             :tabs [:convergence
-                    :cost-function]}]}
+             :tabs [:ab-convergence
+                    :ab-cost-function]}]}
    {:uuid "demo2"
     :name "Demo 2"
     :schema-id "lp2"
     :tests [{:uuid 2
-             :title "A/C testing"
+             :title "A/Z testing"
              :type :az
              :tabs [:convergence
                     :cost-function
                     :feature-importances]}
             {:uuid 3
-             :title "A/D testing"
+             :title "A/B testing"
              :type :ab
-             :tabs [:convergence
-                    :cost-function]}]}])
+             :tabs [:ab-convergence
+                    :ab-cost-function]}]}])
 
 (defn get
   [uuid]
   (first (filter (comp #{uuid} :uuid) data)))
+
+(defn get-test
+  [uuid-demo uuid-test]
+  (first (filter (comp #{uuid-test} :uuid) (:tests (get uuid-demo)))))

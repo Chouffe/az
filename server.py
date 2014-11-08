@@ -183,6 +183,7 @@ def experiment_results(uuid):
 
 
 @app.route('/api/graph/results/<string:uuid>', methods=['GET'])
+@crossdomain(origin="http://localhost:3449")
 def results_graph(uuid):
     schema = db.get_schema(uuid)
     features = schema['features']
@@ -192,6 +193,7 @@ def results_graph(uuid):
 
 
 @app.route('/api/ab/graph/results/<string:uuid>', methods=['GET'])
+@crossdomain(origin="http://localhost:3449")
 def ab_results_graph(uuid):
     schema = db.get_schema(uuid)
     features = schema['features']
@@ -202,6 +204,7 @@ def ab_results_graph(uuid):
 # TODO: add color scale for better visualization
 # Insight of the convergence
 @app.route('/api/graph/obj/<string:uuid>', methods=['GET'])
+@crossdomain(origin="http://localhost:3449")
 def results_objective_function(uuid):
     datapoints = [d for d in db.get_datapoints(uuid)]
     schema = db.get_schema(uuid)

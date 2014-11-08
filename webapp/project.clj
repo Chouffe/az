@@ -10,6 +10,8 @@
                                    :output-dir "resources/public/js/compiled/out"
                                    :preamble ["reagent/react.js"]
                                    :externs ["react/externs/react.js"]
+
+                                   :libs ["singult.js"]
                                    :optimizations :none
                                    :source-map true}}]}
 
@@ -24,6 +26,7 @@
                              [reagent "0.4.2"]]
               :plugins [;; Clojurescript plugins
                         [lein-cljsbuild "1.0.3"] ;; 1.0.3 is a requirement
+                        ;; [lein-cljsbuild "0.2.7"] ;; 1.0.3 is a requirement
                         [lein-figwheel "0.1.5-SNAPSHOT"]]}}
   :source-paths ["src/clj"]
   :dependencies [[org.clojure/clojure "1.6.0"]])

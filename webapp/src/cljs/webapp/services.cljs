@@ -3,6 +3,9 @@
   (:require [webapp.state.demo :as demo]
             [webapp.demo-data :as demo-data]
             [webapp.state.schemas :as schemas]
+            [webapp.state.convergence :as convergence]
+            [webapp.state.ab-convergence :as ab-convergence]
+            [webapp.state.projection :as projection]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
             [webapp.utils.ajax :as ajaxu]))
@@ -30,6 +33,25 @@
   (print "loading the demo " uuid)
   (demo/set-uuid uuid)
   (print (demo-data/get uuid)))
+
+(defn load-convergence
+  [uuid]
+  (go
+    (let [data (<! (ajaxu/get-json (str "http://localhost:5002/api/graph/results/" uuid)))]
+      (convergence/set uuid data))))
+
+(defn load-ab-convergence
+  [uuid]
+  (go
+    (let [data (<! (ajaxu/get-json (str "http://localhost:5002/api/ab/graph/results/" uuid)))]
+      (ab-convergence/set uuid data)
+      (print data))))
+
+(defn load-projection
+  [uuid]
+  (go
+    (let [data (<! (ajaxu/get-json (str "http://localhost:5002/api/graph/obj/" uuid)))]
+      (projection/set uuid data))))
 
 (defn load-schema
   [uuid]

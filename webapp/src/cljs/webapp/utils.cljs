@@ -1,5 +1,25 @@
 (ns webapp.utils)
 
+(defn mean
+  [xs]
+  (if-not (seq xs)
+    0
+    (/ (reduce + xs) (count xs))))
+
+(defn sqrt
+  [x]
+  (when (pos? x)
+    (js/Math.sqrt x)))
+
+(defn std
+  [s]
+  (let [m (mean s)]
+    (sqrt
+      (/ (reduce + (map #(* (- % m)
+                            (- % m))
+                        s))
+         (count s)))))
+
 (defn parse-json
   ([s] (parse-json s true))
   ([s keywordize-keys?]
