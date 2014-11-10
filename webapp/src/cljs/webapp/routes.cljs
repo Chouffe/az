@@ -11,12 +11,18 @@
 (defroute home-path "/" []
   (application/set-tab :home))
 
-(defroute demo-path "/demo" []
-  (application/set-tab :demo))
-
 (defroute demo-path "/demo/:uuid" [uuid]
   (srv/load-demo uuid)
   (application/set-tab :demo-results))
+
+(defroute demo-path "/experiments/new" []
+  (application/set-tab :experiments))
+
+(defroute demo-path "/experiments/results/:uuid" [uuid]
+  (print "YOOOO" uuid)
+  (application/set-tab :experiment-results)
+  (print (application/get-tab))
+  )
 
 ;; Catch all
 (defroute "*" []

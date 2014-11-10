@@ -3,6 +3,7 @@
             [cljs.reader :as reader]
             [webapp.state.schemas :as schemas]
             [webapp.state.application :as application]
+            [webapp.demo-data :as demo-data]
             [dommy.core :as dommy :refer-macros [sel sel1]]
             [webapp.services :as srv]))
 
@@ -19,11 +20,33 @@
          (when (= :home active-tab)
            {:class "active"})
          [:a {:href "#"} "Home"]]
-        [:li
-         (when (or (= :demo active-tab)
-                   (= :demo-results active-tab))
+        [:li.dropdown
+         (when (= :experiments active-tab)
            {:class "active"})
-         [:a {:href "#/demo"} "Demos"]]]]]]))
+         [:a.dropdown-toggle
+          {:data-toggle "dropdown" :href "#"}
+          "Experiments "
+          [:span.caret]]
+         [:ul.dropdown-menu
+          [:li
+           [:a {:href (str "#/experiments/results/" "yo2")}
+            "yo2"]]
+          [:li.divider]
+          [:li
+           [:a {:href (str "#/experiments/new")}
+            "New experiment"]]]]
+        [:li.dropdown
+         (when (= :demo-results active-tab)
+           {:class "active"})
+         [:a.dropdown-toggle
+          {:data-toggle "dropdown" :href "#"}
+          "Demos "
+          [:span.caret]]
+         [:ul.dropdown-menu
+          (for [{:keys [uuid name]} demo-data/data]
+          [:li
+           [:a {:href (str "#/demo/" uuid)}
+            name]])]]]]]]))
 
 (defn tabs
   [data]

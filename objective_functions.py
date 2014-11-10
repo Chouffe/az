@@ -76,8 +76,12 @@ def obj_function2_noisy(**kwargs):
 # Real world examples
 
 
-@noisy(sigma=.25)
-def obj_function_landing_page(background, font_size, color, number_columns, popup, **kwargs):
+def obj_function_landing_page(background,
+                              font_size,
+                              color,
+                              number_columns,
+                              popup,
+                              **kwargs):
     """
     Variable meaning:
     -----------------
@@ -103,6 +107,11 @@ def obj_function_landing_page(background, font_size, color, number_columns, popu
         color_f(color) + number_columns_f(number_columns)) / 100
 
 
+@noisy(sigma=.25)
+def obj_function_landing_page_noisy(**kwargs):
+    return obj_function_landing_page(**kwargs)
+
+
 @draw
 def obj_function_landing_page_draw(**kwargs):
-    return obj_function_landing_page(**kwargs)
+    return obj_function_landing_page_noisy(**kwargs)

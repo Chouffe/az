@@ -8,6 +8,7 @@
             [webapp.utils.ajax :as ajaxu]
             webapp.home
             webapp.demo
+            webapp.experiments
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
@@ -23,7 +24,8 @@
 
 (def tab->page
   {:home webapp.home/home-comp
-   :demo webapp.demo/demo-comp
+   :experiments webapp.experiments/experiments-comp
+   :experiment-results webapp.experiments/experiment-results-comp
    :demo-results webapp.demo/demo-results-comp})
 
 (defn webapp-core

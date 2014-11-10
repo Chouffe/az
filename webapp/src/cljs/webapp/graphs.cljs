@@ -5,6 +5,70 @@
     [goog.string :as gstring]
     [goog.string.format]))
 
+(defn xscale
+  [xmin xmax width]
+  (fn [x] (/ (* x width) (+ xmin xmax))))
+
+(defn yscale
+  [ymin ymax height]
+  (fn [y] (if (= 0 (- ymin ymax))
+            height
+            (- height (/ (* y height) (+ ymin ymax))))))
+
+(defn bar-chart
+  [{:keys [data width height ylabel]
+    :or {width 500 height 400 ylabel "y"}}]
+  (let [margin {:left 40 :right 40 :top 40 :bottom 40
+                :axis-x 22 :axis-y 20
+                :label-x 40 :label-y 40}
+
+        ylabel "Importance (%)"
+
+        width (- width (:left margin) (:right margin))
+        height (- height (:top margin) (:bottom margin))
+
+        yscale (yscale 0 100 height)
+        xscale (xscale 0 (count data) width)
+
+        bar-width (min 50 (/ width (count data)))
+
+        ;; TODO: do that out of that function
+        data-sum (reduce + (map second data))
+        data (sort-by second > data)]
+
+    [:svg {:width (+ width (:left margin) (:right margin))
+           :height (+ height (:top margin) (:bottom margin))}
+     [:g.chart-area
+      {:transform (str "translate(" (:left margin) "," (:top margin) ")")}
+      [:g.domain.domain-y
+       [:line {:style {"stroke" "black" "stroke-width" 2}
+               :x1 0 :y1 0 :x2 0 :y2 height}]
+       [:text {:y -30 :x -100 :transform "rotate(270)"}
+        ylabel]]
+      [:g.domain.domain-x {:transform (str "translate(0," height ")")}
+       [:line {:style {"stroke" "black" "stroke-width" 2}
+               :x1 0 :y1 0 :x2 width :y2 0}]]
+      [:g
+       (for [y (range 0 100 10)]
+         [:g.ticks
+          [:line {:style {"stroke" "#ccc" "stroke-width" 1}
+                  :x1 0 :y1 (yscale y) :x2 width :y2 (yscale y)}]
+          [:text {:x (- 0 (:axis-x margin)) :y (yscale y)}
+           (gstring/format "%.0f" y)]])]
+     [:g.bars
+      (for [[x [xlabel frequency]] (mapv vector (range) data)]
+        [:rect {:style {"fill" "#339CFF"}
+                :x (xscale x)
+                :y (yscale frequency)
+                :height (- height (yscale frequency))
+                :width bar-width}])]
+      [:g
+       (for [[x xlabel] (mapv vector (range) (mapv first data))]
+         [:g.ticks {:transform "rotate(270)"}
+
+          [:text {:y (+ (xscale x) (/ bar-width 2)) :x (- 5 height)}
+           (name xlabel)]])]]]))
+
 (defn scatter-plot
   [{:keys [data width height xlabel ylabel
            xticks yticks path? lines]
@@ -135,6 +199,6 @@
            :lines (when @display-info-line? info-lines)
            :xlabel "Draw #"
            :ylabel (name ylabel)
-           :path? true
-           :xticks 5
-           :yticks 6}]])))))
+           :path? true}]])))))
+
+

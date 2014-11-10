@@ -7,6 +7,8 @@ import data_handling
 import generator
 import requests
 import random
+import objective_functions
+import experiments
 # TODO: kill
 from crossdomain import crossdomain
 
@@ -222,6 +224,54 @@ def results_objective_function(uuid):
                 results[f]['x'].append(features[f]['default'])
 
     return json.dumps(results)
+
+
+@app.route('/api/graph/obj-function/<string:uuid>', methods=['GET'])
+@crossdomain(origin="http://localhost:3449")
+def results_cost_function(uuid):
+    datapoints = [d for d in db.get_datapoints(uuid)]
+    schema = db.get_schema(uuid)
+    features = schema['features']
+    experiment = experiments.get_experiment(uuid)
+    # print schema
+    # print features
+    # print experiment
+    if experiment is None:
+        return json.dumps({'error': "No experiment found"})
+    else:
+        obj_function = experiment['objective_function']
+        results = data_handling.datapoints_to_cost_function_result(datapoints,
+                                                                   features,
+                                                                   obj_function)
+        return json.dumps({'results': results})
+
+
+@app.route('/api/ab/graph/obj-function/<string:uuid>', methods=['GET'])
+@crossdomain(origin="http://localhost:3449")
+def ab_results_cost_function(uuid):
+    datapoints = [d for d in db.get_abdatapoints(uuid)]
+    schema = db.get_schema(uuid)
+    features = schema['features']
+    experiment = experiments.get_experiment(uuid)
+    print schema
+    print features
+    print experiment
+    if experiment is None:
+        return json.dumps({'error': "No experiment found"})
+    else:
+        obj_function = experiment['objective_function']
+        results = data_handling.datapoints_to_cost_function_result(datapoints,
+                                                                   features,
+                                                                   obj_function)
+        return json.dumps({'results': results})
+
+
+@app.route('/api/graph/feature-importances/<string:uuid>', methods=['GET'])
+@crossdomain(origin="http://localhost:3449")
+def results_feature_importances(uuid):
+    base_url = "http://localhost:%s/service/feature-importances/" % settings.ml_service_port
+    r = requests.get(base_url + uuid)
+    return json.dumps(r.json())
 
 if __name__ == '__main__':
     app.run(port=settings.server_port)

@@ -5,6 +5,9 @@
             [webapp.state.schemas :as schemas]
             [webapp.state.convergence :as convergence]
             [webapp.state.ab-convergence :as ab-convergence]
+            [webapp.state.cost-function :as cost-function]
+            [webapp.state.ab-cost-function :as ab-cost-function]
+            [webapp.state.feature-importances :as feature-importances]
             [webapp.state.projection :as projection]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
@@ -33,6 +36,24 @@
   (print "loading the demo " uuid)
   (demo/set-uuid uuid)
   (print (demo-data/get uuid)))
+
+(defn load-cost-function
+  [uuid]
+  (go
+    (let [{:keys [results]} (<! (ajaxu/get-json (str "http://localhost:5002/api/graph/obj-function/" uuid)))]
+      (cost-function/set uuid results))))
+
+(defn load-ab-cost-function
+  [uuid]
+  (go
+    (let [{:keys [results]} (<! (ajaxu/get-json (str "http://localhost:5002/api/ab/graph/obj-function/" uuid)))]
+      (ab-cost-function/set uuid results))))
+
+(defn load-feature-importances
+  [uuid]
+  (go
+    (let [data (<! (ajaxu/get-json (str "http://localhost:5002/api/graph/feature-importances/" uuid)))]
+      (feature-importances/set uuid data))))
 
 (defn load-convergence
   [uuid]

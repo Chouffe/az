@@ -4,7 +4,8 @@ import objective_functions
 # Landing Page Experiment
 landing_page = {
     'uuid': 'lp',
-    'objective_function': objective_functions.obj_function_landing_page_draw,
+    'objective_function': objective_functions.obj_function_landing_page,
+    'objective_function_draw': objective_functions.obj_function_landing_page_draw,
     'n_trials': 100,
     'n_points': 100,
     'feature_names': [
@@ -32,7 +33,8 @@ landing_page = {
 
 landing_page2 = {
     'uuid': 'lp2',
-    'objective_function': objective_functions.obj_function_landing_page_draw,
+    'objective_function': objective_functions.obj_function_landing_page,
+    'objective_function_draw': objective_functions.obj_function_landing_page_draw,
     'n_trials': 100,
     'n_points': 100,
     'feature_names': [
@@ -86,18 +88,28 @@ landing_page2 = {
 }
 
 
+def get_experiment(uuid):
+    experiments = [landing_page, landing_page2]
+    for exp in experiments:
+        if exp['uuid'] == uuid:
+            return exp
+    return None
+
+
+
+
 def run(data, f):
     """Runs f with data -  Return f(data)"""
 
     assert 'uuid' in data, "uuid not in data"
-    assert 'objective_function' in data, "objective_function not in data"
+    assert 'objective_function_draw' in data, "objective_function_draw not in data"
     assert 'n_points' in data, "n_points not in data"
     assert 'n_trials' in data, "n_trials not in data"
     assert 'feature_names' in data, "feature_names not in data"
     assert 'feature_distributions' in data, "feature_distributions not in data"
     assert 'feature_params' in data, "feature_params not in data"
 
-    return f(data['objective_function'],
+    return f(data['objective_function_draw'],
              data['n_points'],
              data['n_trials'],
              len(data['feature_names']),

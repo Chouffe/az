@@ -9,6 +9,7 @@
              :title "A/Z testing"
              :type :az
              :tabs [:convergence
+                    :projection
                     :cost-function
                     :feature-importances]}
             {:uuid 2

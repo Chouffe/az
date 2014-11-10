@@ -95,32 +95,6 @@ def run_experiment(objective_function,
 #                feature_distributions=itertools.repeat('uniform'))
 
 
-# Landing Page Experiment
-experiment_data = {
-    'objective_function': objective_functions.obj_function_landing_page,
-    'feature_names': [
-        "background",
-        "font_size",
-        "color",
-        "number_columns",
-        "popup"
-    ],
-    'feature_distributions': [
-        "uniform_discrete",
-        "uniform_discrete",
-        "uniform_discrete",
-        "uniform_discrete",
-        "binary"
-    ],
-    'feature_params': [
-        {'low': 0, 'high': 10},
-        {'low': 0, 'high': 15},
-        {'low': 0, 'high': 6},
-        {'low': 0, 'high': 10},
-        {}
-    ]
-}
-
 # results = run_experiment(utils.obj_function_draw, 100, 200, 100, feature_distributions=itertools.repeat('uniform'))
 # utils.format_results(*results, features_to_show=['a1', 'a2', 'a3'])
 

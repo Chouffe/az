@@ -20,6 +20,13 @@
                         s))
          (count s)))))
 
+(defn scale-for-bar-charts
+  [data]
+  (let [sum (reduce + (map second data))
+        scale (fn [[label frequency]]
+                [label (/ (* 100 frequency) sum)])]
+    (map scale data)))
+
 (defn parse-json
   ([s] (parse-json s true))
   ([s keywordize-keys?]

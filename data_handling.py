@@ -2,6 +2,7 @@ import numpy as np
 import utils
 import db
 import ml
+import objective_functions
 
 
 def api_preprocess_datapoint(data):
@@ -72,6 +73,16 @@ def datapoints_to_graph_results(datapoints, features):
                 results[f].append(features[f]['default'])
 
     return results
+
+
+def datapoints_to_cost_function_result(datapoints, features, obj_function):
+    point_dict = utils.process_datapoints(datapoints)
+    tmp = [dict(m['features'].items() +
+                {'time': sorted(m['time'])[-1]}.items())
+           for _, m in point_dict.items()]
+    tmp = sorted(tmp, key=lambda d: d['time'])
+
+    return [obj_function(**p) for p in tmp]
 
 
 def point_to_vector(point, features):

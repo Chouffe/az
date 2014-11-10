@@ -3,6 +3,9 @@
             [webapp.state.schemas :as schemas]
             [webapp.state.convergence :as convergence]
             [webapp.state.ab-convergence :as ab-convergence]
+            [webapp.state.cost-function :as cost-function]
+            [webapp.state.ab-cost-function :as ab-cost-function]
+            [webapp.state.feature-importances :as feature-importances]
             [webapp.state.projection :as projection]
             [webapp.state.demo :as demo]
             [secretary.core :as secretary]
@@ -13,39 +16,70 @@
             [dommy.core :as dommy :refer-macros [sel sel1]]
             [webapp.components :as components]))
 
-(defn demo-comp
-  []
-  [:div.container
-   [:div.jumbotron
-    [:h1 "Demos"]
-    [:p "Select the demo you want to run :)"]
-    [:div.input-group
-     [:select.form-control
-      (for [{:keys [uuid name]} demo-data/data]
-        [:option {:value uuid} name])]
-     [:span.input-group-btn
-      [:button.btn.btn-success
-       {:id "yo"
-        :on-click
-        #(let [selected-demo (dommy/value (sel1 :select))]
-           (secretary/dispatch! (str "/demo/" selected-demo))
-           (print selected-demo))}
-       "Run"]]]]])
-
 (defn tabs-data
   [uuid active-tab tab-kw]
-  (when (#{:convergence :cost-function
+  (when (#{:convergence
+           :cost-function
            :feature-importances
-           :ab-convergence :ab-cost-function}
+           :projection
+           :ab-convergence
+           :ab-cost-function}
                         tab-kw)
     (let [m {:on-click #(demo/set-tab uuid tab-kw)
              :active? (= active-tab tab-kw)}]
       (case tab-kw
+        :projection (assoc m :title "Projection")
         :convergence (assoc m :title "Convergence")
         :ab-convergence (assoc m :title "Convergence")
         :cost-function (assoc m :title "Cost Function")
         :ab-cost-function (assoc m :title "Cost Function")
         :feature-importances (assoc m :title "Feature Importances")))))
+
+(defn demo-graph-cost-function
+  []
+  (reagent/create-class
+    {:component-will-mount
+     (fn [_]
+       (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))]
+         (srv/load-cost-function schema-id)))
+
+     :render
+     (fn [_]
+       (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))
+             ydata (cost-function/get schema-id)]
+         ;; TODO: kill + 3
+         [:div
+          (when ydata
+            [graphs/scatter-plot
+             {:data (mapv vector (range) (map (partial + 3) ydata))
+              :ylabel "F"
+              :xlabel "time"
+              :lines [{:color "red"
+                       :line-width 3
+                       :title "learning"
+                       :x 50}]
+              :path? true}])]))}))
+
+(defn demo-graph-ab-cost-function
+  []
+  (reagent/create-class
+    {:component-will-mount
+     (fn [_]
+       (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))]
+         (srv/load-ab-cost-function schema-id)))
+
+     :render
+     (fn [_]
+       (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))
+             ydata (ab-cost-function/get schema-id)]
+         ;; TODO: kill + 3
+         [:div
+          (when ydata
+            [graphs/scatter-plot
+             {:data (mapv vector (range) (map (partial + 3) ydata))
+              :ylabel "F"
+              :xlabel "time"
+              :path? true}])]))}))
 
 (defn demo-graph-convergence
   []
@@ -80,6 +114,20 @@
             ^{:key ylabel}
             [graphs/single-graph-comp ylabel ydata])]))}))
 
+(defn demo-graph-feature-importances
+  []
+  (reagent/create-class
+    {:component-will-mount
+     (fn [_]
+       (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))]
+         (srv/load-feature-importances schema-id)))
+
+     :render
+     (fn [_]
+       (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))]
+         [graphs/bar-chart {:data
+                            (utils/scale-for-bar-charts (feature-importances/get schema-id))}]))}))
+
 (defn demo-graph-projection
   []
   (reagent/create-class
@@ -91,7 +139,6 @@
      :render
      (fn [_]
        (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))]
-         [:div "Projextion"]
          [:div
           (for [[xlabel {:keys [x y]}] (projection/get schema-id)]
             ^{:key xlabel}
@@ -106,8 +153,6 @@
 (defn demo-graph
   [uuid]
   (let [active-tab (demo/get-tab uuid)]
-    (print "UUID" uuid)
-    (print "UUID" type)
     (case active-tab
       :convergence
       [demo-graph-convergence]
@@ -116,13 +161,16 @@
       [demo-graph-ab-convergence]
 
       :cost-function
-      [:div  "Cost Function"]
+      [demo-graph-cost-function]
 
       :ab-cost-function
-      [:div "AB Cost Function"]
+      [demo-graph-ab-cost-function]
+
+      :projection
+      [demo-graph-projection]
 
       :feature-importances
-      [demo-graph-projection]
+      [demo-graph-feature-importances]
 
       [:div "Select a tab..."])))
 

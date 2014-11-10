@@ -15,7 +15,11 @@
   []
   (reagent/create-class
     {:component-will-mount
-     (fn [_] (srv/load-convergence "lp"))
+     (fn [_] #_(srv/load-convergence "lp"))
 
      :render
-     (fn [_] [:div.container "HELLO"])}))
+     (fn [_]
+       [:div.container
+        [graphs/bar-chart {:data (utils/scale-for-bar-charts {:a0 30 :a1 200 :a2 23 :b1 34 :c2 40 :b 40 :e 50 :f 69 :g 10})}]
+
+        ])}))
