@@ -53,6 +53,10 @@ class ABTesting(ApiBase):
         self._current_baseline_point = None
         self._current_variation_point = None
 
+    def delete(self):
+        """Deletes the entries in the DB"""
+        db.delete_abdatapoints(self.uuid)
+
     def add_feature(self, feature_name, distribution, **kwargs):
         """Given a feature name and a distribution, it adds a feature to
         the feature set"""

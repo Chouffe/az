@@ -92,7 +92,6 @@
      :render
      (fn [_]
        (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))]
-         ;; [:div "CONVERGENCE"]
          [:div
           (for [[ylabel ydata] (convergence/get schema-id)]
             ^{:key ylabel}
@@ -203,21 +202,12 @@
              {:keys [schema-id tests] :as demo}
              (demo-data/get demo-uuid)]
          [:div.container
-          (pr-str demo)
-          (pr-str (schemas/get schema-id))
+          [:div.center-block
+           [:button.btn.btn-success.btn-lg
+            {:on-click #(srv/run-demo demo-uuid)}
+            "Run"]]
           [components/schema-component schema-id]
           [:div.row
            (for [{:keys [uuid] :as test} tests]
              ^{:key uuid}
-             [demo-results-test-comp test])]])
-       )
-     }
-    )
-  )
-
-;; Tests
-;; (srv/load-schema "lp")
-;; (srv/load-schema "lp")
-;; (srv/add-feature "lp" "b" {:distribution "uniform"
-;;                            :default 0
-;;                            :params {}})
+             [demo-results-test-comp test])]]))}))

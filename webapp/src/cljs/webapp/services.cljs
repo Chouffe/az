@@ -37,6 +37,12 @@
   (demo/set-uuid uuid)
   (print (demo-data/get uuid)))
 
+(defn run-demo
+  [uuid]
+  (print "running the demo " uuid)
+  (go
+    (<! (ajaxu/get-json (str "http://localhost:5002/api/demo/" uuid)))))
+
 (defn load-cost-function
   [uuid]
   (go

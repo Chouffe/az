@@ -7,7 +7,6 @@ import data_handling
 import generator
 import requests
 import random
-import objective_functions
 import experiments
 # TODO: kill
 from crossdomain import crossdomain
@@ -232,10 +231,7 @@ def results_cost_function(uuid):
     datapoints = [d for d in db.get_datapoints(uuid)]
     schema = db.get_schema(uuid)
     features = schema['features']
-    experiment = experiments.get_experiment(uuid)
-    # print schema
-    # print features
-    # print experiment
+    experiment = experiments.get_experiment_by_schema_uuid(uuid)
     if experiment is None:
         return json.dumps({'error': "No experiment found"})
     else:
@@ -252,10 +248,7 @@ def ab_results_cost_function(uuid):
     datapoints = [d for d in db.get_abdatapoints(uuid)]
     schema = db.get_schema(uuid)
     features = schema['features']
-    experiment = experiments.get_experiment(uuid)
-    print schema
-    print features
-    print experiment
+    experiment = experiments.get_experiment_by_schema_uuid(uuid)
     if experiment is None:
         return json.dumps({'error': "No experiment found"})
     else:
@@ -272,6 +265,15 @@ def results_feature_importances(uuid):
     base_url = "http://localhost:%s/service/feature-importances/" % settings.ml_service_port
     r = requests.get(base_url + uuid)
     return json.dumps(r.json())
+
+
+@app.route('/api/demo/<string:uuid>', methods=['GET'])
+@crossdomain(origin="http://localhost:3449")
+def run_demo(uuid):
+    # Run in another thread
+    # It kills the main one...
+    # experiments.run_demo(uuid)
+    return json.dumps({'results': 'running'})
 
 if __name__ == '__main__':
     app.run(port=settings.server_port)
