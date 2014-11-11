@@ -9,8 +9,8 @@ landing_page = {
     'schema_uuid': 'lp',
     'objective_function': objective_functions.obj_function_landing_page,
     'objective_function_draw': objective_functions.obj_function_landing_page_draw,
-    'n_trials': 100,
-    'n_points': 100,
+    'n_trials': 200,
+    'n_points': 200,
     'feature_names': [
         "background",
         "font_size",
@@ -39,8 +39,8 @@ landing_page2 = {
     'schema_uuid': 'lp2',
     'objective_function': objective_functions.obj_function_landing_page,
     'objective_function_draw': objective_functions.obj_function_landing_page_draw,
-    'n_trials': 100,
-    'n_points': 100,
+    'n_trials': 200,
+    'n_points': 200,
     'feature_names': [
         "background",
         "font_size",
@@ -130,6 +130,7 @@ def run(data, f):
              feature_distributions=data['feature_distributions'],
              feature_params=data['feature_params'])
 
+
 def run_demo(uuid):
     experiment = get_experiment(uuid)
     if experiment is None:
@@ -138,4 +139,4 @@ def run_demo(uuid):
         run(experiment, experiments_ab.run_experiment)
         run(experiment, experiments_az.run_experiment)
 
-# run_demo('demo1')
+# run_demo('demo2')

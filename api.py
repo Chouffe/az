@@ -53,9 +53,31 @@ class ABTesting(ApiBase):
         self._current_baseline_point = None
         self._current_variation_point = None
 
+        self._explored_feature_names = set()
+        self._current_variation_feature_name = None
+        self._current_variation_feature_values = None
+
     def delete(self):
         """Deletes the entries in the DB"""
         db.delete_abdatapoints(self.uuid)
+
+    def _generate_variation_feature_values(self):
+        """When self._current_variation_feature_name is set,
+        it samples some values to try"""
+        assert self._current_baseline_point
+        assert self._current_variation_feature_name
+
+        rg = generator.RandomGenerator(self.features)
+        random_values = set([rg.get_for_feature(self._current_variation_feature_name)[0]
+                             for _ in range(100)])
+
+        baseline_value = self._current_baseline_point[self._current_variation_feature_name]
+        if baseline_value in random_values:
+            random_values.remove(baseline_value)
+
+        self._current_variation_feature_values = list(random_values)
+        random.shuffle(self._current_variation_feature_values)
+        return self._current_variation_feature_values
 
     def add_feature(self, feature_name, distribution, **kwargs):
         """Given a feature name and a distribution, it adds a feature to
@@ -76,21 +98,54 @@ class ABTesting(ApiBase):
         return {name: generate_random_from_feature(f)
                 for name, f in self.features.iteritems()}
 
+    def _pick_feature_name(self):
+        """Randomly returns a feature name that has not been explored yet."""
+        feature_names = self.features.keys()
+        shuffled_feature_names = random.sample(feature_names,
+                                               len(feature_names))
+        selected_feature_name = None
+        for f in shuffled_feature_names:
+            if f not in self._explored_feature_names:
+                selected_feature_name = f
+                break
+
+        return selected_feature_name
+
     def _generate_next_point(self, point):
-        """Given a point, it generates the next one by
-        swaping a 0 -> 1 or 1-> 0 for binary distributions and by generating
-        a random point for other distributions"""
+        """Given a point, it generates the next one"""
+
         next_point = point.copy()
 
-        selected_feature_name = random.choice(self.features.keys())
-        selected_feature = self.features[selected_feature_name]
+        assert len(self.features.keys()) > 0
 
-        if selected_feature['distribution'] == 'binary':
-            # From 0 -> 1 and 1 -> 0
-            next_point[selected_feature_name] ^= 1
-        else:
-            rg = generator.RandomGenerator(self.features)
-            next_point[selected_feature_name] = rg.get_for_feature(selected_feature_name)[0]
+        # If all the features have been explored
+        if len(self._explored_feature_names) >= len(self.features.keys()):
+            self._explored_feature_names = set()
+            self._current_variation_feature_name = None
+            self._current_variation_feature_values = []
+
+        # If the feature values set is empty
+        if not self._current_variation_feature_values:
+            self._current_variation_feature_name = None
+
+        # If no feature name is set
+        if not self._current_variation_feature_name:
+            self._current_variation_feature_name = self._pick_feature_name()
+            self._generate_variation_feature_values()
+            self._explored_feature_names.add(self._current_variation_feature_name)
+
+        # If the current feature name is not in the explored set
+        # if self._current_variation_feature_name not in self._explored_feature_names:
+            # self._generate_variation_feature_values()
+            # self._current_variation_feature_name.add(self._current_variation_feature_name)
+
+        # Should be able to get a feature value
+        assert len(self._current_variation_feature_values) > 0
+
+        next_point[self._current_variation_feature_name] = self._current_variation_feature_values.pop()
+
+        # print next_point
+        # print self._current_baseline_point
 
         return next_point
 
@@ -133,6 +188,16 @@ class ABTesting(ApiBase):
             print "Division by Zero"
             return False
 
+    def set_baseline(self, point):
+        self._current_baseline_point = point
+
+    def set_variation(self, point):
+        self._current_variation_point = point
+
+    def set_variation_feature(self, feature_name):
+        self._current_variation_feature = feature_name
+
+    # TODO: change it to use the vary only one feature at a time
     def get_candidate(self, **kwargs):
         """Returns the candidate point to try next"""
         # if no baseline has been defined
