@@ -2,10 +2,15 @@
   (:require [reagent.core :as reagent]
             [cljs.reader :as reader]
             [webapp.state.schemas :as schemas]
+            [webapp.state.convergence :as convergence]
+            [webapp.state.projection :as projection]
             [webapp.state.application :as application]
+            [webapp.services :as srv]
+            [webapp.utils :as utils]
             [webapp.demo-data :as demo-data]
-            [dommy.core :as dommy :refer-macros [sel sel1]]
-            [webapp.services :as srv]))
+            [webapp.state.feature-importances :as feature-importances]
+            [webapp.graphs :as graphs]
+            [dommy.core :as dommy :refer-macros [sel sel1]]))
 
 (defn navbar
   []
@@ -69,67 +74,128 @@
   [schema-id]
   (let [{:keys [features uuid] :as schema}
         (schemas/get schema-id)]
-    [:div.panel.panel-default
-     [:div.panel-heading "Schema for " uuid]
-     ;; [:div.panel-body "Here is the schema of the experiment"]
-     [:table.table.table-striped
-      [:thead
-       [:tr
-        [:th "Name"]
-        [:th "Distribution"]
-        [:th "Default"]
-        [:th "Params"]
-        [:th "Actions"]]]
-      [:tbody
-       (for [[feature-name feature-map] (sort-by key features)]
-         ^{:key feature-name}
-         (let [{:keys [default distribution params]} feature-map]
-           [:tr
-            [:td (name feature-name)]
-            [:td distribution]
-            [:td default]
-            [:td (pr-str params)]
-            [:td
-             [:button.btn.btn-danger
-              {:on-click #(srv/delete-feature uuid feature-name)}
-              "Delete"]]]))]
-      [:tfoot
-       (let [distributions ["binary"
-                            "uniform"
-                            "uniform_discrete"
-                            "normal"]]
+    (if-not schema
+      [:div]
+      [:div.panel.panel-default
+       [:div.panel-heading "Schema for " uuid]
+       ;; [:div.panel-body "Here is the schema of the experiment"]
+       [:table.table.table-striped
+        [:thead
          [:tr
-          [:td
-           [:input.form-control {:placeholder "Feature Name"
-                                 :name "name"
-                                 :id "feature-name"
-                                 :required "required"}]]
-          [:td
-           [:select.form-control {:name "distribution"
-                                  :id "feature-distribution"
-                                  :required "required"}
-            (for [distribution distributions]
-              ^{:key distribution}
-              [:option {:value distribution} distribution])]]
-          [:td
-           [:input.form-control {:placeholder "Default"
-                                 :name "default"
-                                 :id "feature-default"
-                                 :required "required"}]]
-          [:td
-           [:input.form-control {:placeholder "Parameters"
-                                 :id "feature-params"
-                                 :name "params"
-                                 :required "required"}]]
-          [:td
-           [:button.btn.btn-primary
-            ;; TODO: feature map
-            {:on-click #(let [name (dommy/value (sel1 :#feature-name))
-                              distribution (dommy/value (sel1 :#feature-distribution))
-                              default (dommy/value (sel1 :#feature-default))
-                              params (reader/read-string (dommy/value (sel1 :#feature-params)))]
-                          (srv/add-feature uuid name
-                                           {:distribution distribution
-                                            :default default
-                                            :params (into {} (map (fn [[k v]] [(keyword k) v]) params))}))}
-            "Add"]]])]]]))
+          [:th "Name"]
+          [:th "Distribution"]
+          [:th "Default"]
+          [:th "Params"]
+          [:th "Actions"]]]
+        [:tbody
+         (for [[feature-name feature-map] (sort-by key features)]
+           ^{:key feature-name}
+           (let [{:keys [default distribution params]} feature-map]
+             [:tr
+              [:td (name feature-name)]
+              [:td distribution]
+              [:td default]
+              [:td (pr-str params)]
+              [:td
+               [:button.btn.btn-danger
+                {:on-click #(srv/delete-feature uuid feature-name)}
+                "Delete"]]]))]
+        [:tfoot
+         (let [distributions ["binary"
+                              "uniform"
+                              "uniform_discrete"
+                              "normal"]]
+           [:tr
+            [:td
+             [:input.form-control {:placeholder "Feature Name"
+                                   :name "name"
+                                   :id "feature-name"
+                                   :required "required"}]]
+            [:td
+             [:select.form-control {:name "distribution"
+                                    :id "feature-distribution"
+                                    :required "required"}
+              (for [distribution distributions]
+                ^{:key distribution}
+                [:option {:value distribution} distribution])]]
+            [:td
+             [:input.form-control {:placeholder "Default"
+                                   :name "default"
+                                   :id "feature-default"
+                                   :required "required"}]]
+            [:td
+             [:input.form-control {:placeholder "Parameters"
+                                   :id "feature-params"
+                                   :name "params"
+                                   :required "required"}]]
+            [:td
+             [:button.btn.btn-primary
+              ;; TODO: feature map
+              {:on-click #(let [name (dommy/value (sel1 :#feature-name))
+                                distribution (dommy/value (sel1 :#feature-distribution))
+                                default (dommy/value (sel1 :#feature-default))
+                                params (reader/read-string (dommy/value (sel1 :#feature-params)))]
+                            (srv/add-feature uuid name
+                                             {:distribution distribution
+                                              :default default
+                                              :params (into {} (map (fn [[k v]] [(keyword k) v]) params))}))}
+              "Add"]]])]]])))
+
+(defn panel-comp
+  [{:keys [title body footer]}]
+  [:div.panel.panel-info
+   [:div.panel-heading
+    [:h3.panel-title title]]
+   [:div.panel-body body]
+   [:div.panel-footer footer]])
+
+(defn graph-feature-importances
+  [schema-id]
+  (reagent/create-class
+    {:component-will-mount
+     (fn [_] (srv/load-feature-importances schema-id))
+
+     :render
+     (fn [_]
+       (let [data (feature-importances/get schema-id)]
+         [:div
+          (when data
+            [graphs/bar-chart
+             {:data (utils/scale-for-bar-charts data)}])]))}))
+
+(defn graph-projection
+  [schema-id]
+  (reagent/create-class
+    {:component-will-mount
+     (fn [_] (srv/load-projection schema-id))
+
+     :render
+     (fn [_]
+       (let [data (projection/get schema-id)]
+         [:div
+          (for [[xlabel {:keys [x y]}] data]
+            ^{:key xlabel}
+            (if-not (pos? (count x))
+              [:div]
+              [graphs/scatter-plot
+               {:data (mapv vector x y)
+                :ylabel (str "f(" (name xlabel) ")")
+                :xlabel (name xlabel)
+                :width 500
+                :height 400}]))]))}))
+
+(defn graph-convergence
+  [schema-id]
+  (reagent/create-class
+    {:component-will-mount
+     (fn [_] (srv/load-convergence schema-id))
+
+     :render
+     (fn [_]
+       (let [data (convergence/get schema-id)]
+       [:div
+        (for [[ylabel ydata] data]
+          ^{:key ylabel}
+          (if (pos? (count ydata))
+            [graphs/single-graph-comp ylabel ydata true]
+            [:div]))]))}))

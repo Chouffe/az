@@ -6,7 +6,10 @@
             [webapp.state.schemas :as schemas]
             [webapp.state.convergence :as convergence]
             [webapp.state.application :as application]
+            [webapp.state.projection :as projection]
+            [webapp.state.feature-importances :as feature-importances]
             [webapp.state.experiments :as experiments]
+            [webapp.state.next-point :as next-point]
             [webapp.components :as components]
             [webapp.routes :as routes]
             [webapp.graphs :as graphs]
@@ -71,6 +74,7 @@
             [:th "Params"]]]
           [:tbody
            (for [i (range @num-features)]
+             ^{:key i}
              [:tr
               [:td
                [:input.form-control
@@ -79,6 +83,7 @@
                [:select.form-control
                 {:name "feature-distribution" :required true}
                 (for [distribution ["binary" "uniform" "uniform_discrete" "normal"]]
+                  ^{:key distribution}
                   [:option {:value distribution}
                    distribution])]]
               [:td
@@ -91,9 +96,62 @@
 
        "Set up a new experiment here"])))
 
+(defn tabs-data
+  [uuid active-tab tab-kw]
+  (when (#{:convergence
+           :feature-importances
+           :projection} tab-kw)
+    (let [m {:on-click #(experiments/set-tab uuid tab-kw)
+             :active? (= active-tab tab-kw)}]
+      (case tab-kw
+        :projection (assoc m :title "Projection")
+        :convergence (assoc m :title "Convergence")
+        :feature-importances (assoc m :title "Feature Importances")))))
+
+(defn experiment-graph
+  [uuid]
+  (let [active-tab (experiments/get-tab uuid)]
+    (case active-tab
+      :convergence
+      [components/graph-convergence uuid]
+
+      :projection
+      [components/graph-projection uuid]
+
+      :feature-importances
+      [components/graph-feature-importances uuid]
+
+      [:div "Select a tab..."])))
+
 (defn experiment-results-comp
   []
-  [:div.container
-   [components/schema-component (experiments/get-uuid)]])
+  (let [tabs [:convergence :projection :feature-importances]]
+  (reagent/create-class
+    {:component-will-mount
+     (fn [_] (do
+               (experiments/set-tab (experiments/get-uuid) (first tabs))
+               (srv/get-next-point (experiments/get-uuid))))
 
+     :render
+     (fn [_]
+       (let [uuid (experiments/get-uuid)
+             api-url "http://localhost:5002/api/"
+             active-tab (experiments/get-tab uuid)
+             next-point (next-point/get uuid)
+             next-point-result (assoc next-point :result 42)]
+         [:div.container
+          (when uuid
+            [components/schema-component uuid])
+          (when next-point
+            [:div
+             [components/panel-comp
+              {:title "Next point to try"
+               :body (pr-str (next-point/get uuid))
+               :footer (str "$ curl " api-url uuid)}]
+             [components/panel-comp
+              {:title "Save a result"
+               :body (pr-str (assoc (next-point/get uuid) :result 42))
+               :footer (str "$ curl -X POST -H \"Content-Type: application/json\" -d " next-point-result " " api-url uuid)}]])
 
+          [components/tabs (mapv (partial tabs-data uuid active-tab) tabs)]
+          [experiment-graph uuid]]))})))

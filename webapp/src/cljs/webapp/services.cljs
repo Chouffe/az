@@ -5,6 +5,7 @@
             [webapp.state.schemas :as schemas]
             [webapp.state.experiments :as experiments]
             [webapp.state.convergence :as convergence]
+            [webapp.state.next-point :as next-point]
             [webapp.state.ab-convergence :as ab-convergence]
             [webapp.state.cost-function :as cost-function]
             [webapp.state.ab-cost-function :as ab-cost-function]
@@ -99,8 +100,10 @@
   [uuid]
   (go
     (let [schema (<! (ajaxu/get-json (str "http://localhost:5002/api/schema/" uuid)))]
-      (schemas/set schema)))
+      (schemas/set schema))))
 
-  ;; TODO: change the state
-  ;; API call as well
-  )
+(defn get-next-point
+  [uuid]
+  (go
+    (let [point (<! (ajaxu/get-json (str "http://localhost:5002/api/" uuid)))]
+      (next-point/set uuid point))))

@@ -35,6 +35,7 @@
         :ab-cost-function (assoc m :title "Cost Function")
         :feature-importances (assoc m :title "Feature Importances")))))
 
+;; TODO: move to components.cljs
 (defn demo-graph-cost-function
   []
   (reagent/create-class
@@ -113,48 +114,13 @@
             ^{:key ylabel}
             [graphs/single-graph-comp ylabel ydata])]))}))
 
-(defn demo-graph-feature-importances
-  []
-  (reagent/create-class
-    {:component-will-mount
-     (fn [_]
-       (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))]
-         (srv/load-feature-importances schema-id)))
-
-     :render
-     (fn [_]
-       (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))]
-         [graphs/bar-chart {:data
-                            (utils/scale-for-bar-charts (feature-importances/get schema-id))}]))}))
-
-(defn demo-graph-projection
-  []
-  (reagent/create-class
-    {:component-will-mount
-     (fn [_]
-       (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))]
-         (srv/load-projection schema-id)))
-
-     :render
-     (fn [_]
-       (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))]
-         [:div
-          (for [[xlabel {:keys [x y]}] (projection/get schema-id)]
-            ^{:key xlabel}
-
-            [graphs/scatter-plot
-             {:data (mapv vector x y)
-              :ylabel (str "f(" (name xlabel) ")")
-              :xlabel (name xlabel)
-              :width 500
-              :height 400}])]))}))
-
 (defn demo-graph
   [uuid]
-  (let [active-tab (demo/get-tab uuid)]
+  (let [active-tab (demo/get-tab uuid)
+        {:keys [schema-id]} (demo-data/get (demo/get-uuid))]
     (case active-tab
       :convergence
-      [demo-graph-convergence]
+      [components/graph-convergence schema-id]
 
       :ab-convergence
       [demo-graph-ab-convergence]
@@ -166,10 +132,10 @@
       [demo-graph-ab-cost-function]
 
       :projection
-      [demo-graph-projection]
+      [components/graph-projection schema-id]
 
       :feature-importances
-      [demo-graph-feature-importances]
+      [components/graph-feature-importances schema-id]
 
       [:div "Select a tab..."])))
 
@@ -202,7 +168,7 @@
              {:keys [schema-id tests] :as demo}
              (demo-data/get demo-uuid)]
          [:div.container
-          [:div.center-block
+          #_[:div.center-block
            [:button.btn.btn-success.btn-lg
             {:on-click #(srv/run-demo demo-uuid)}
             "Run"]]
