@@ -100,6 +100,18 @@ def save_point(uuid):
         return json.dumps({'error': 'An error occured'})
 
 
+@app.route('/api/schemas', methods=['GET'])
+@crossdomain(origin="http://localhost:3449")
+def get_schemas():
+    """Returns the schemas"""
+    schemas = db.get_schemas()
+
+    for schema in schemas:
+        schema.pop('_id', None)
+
+    return json.dumps({'schemas': schemas})
+
+
 @app.route('/api/schema/<string:uuid>', methods=['GET'])
 @crossdomain(origin="http://localhost:3449")
 def get_schema(uuid):
@@ -113,7 +125,10 @@ def get_schema(uuid):
         return json.dumps(schema)
 
 
-@app.route('/api/schema/<string:uuid>', methods=['POST'])
+@app.route('/api/schema/<string:uuid>', methods=['POST', 'OPTIONS'])
+@crossdomain(origin="http://localhost:3449",
+             headers={'Content-type': 'application/json',
+                      'Accept': 'text/plain'})
 def create_schema(uuid):
     """Creates a schema given the features
     Input:

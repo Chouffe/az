@@ -3,6 +3,7 @@
   (:require [webapp.state.demo :as demo]
             [webapp.demo-data :as demo-data]
             [webapp.state.schemas :as schemas]
+            [webapp.state.experiments :as experiments]
             [webapp.state.convergence :as convergence]
             [webapp.state.ab-convergence :as ab-convergence]
             [webapp.state.cost-function :as cost-function]
@@ -31,15 +32,30 @@
                                       {feature-name feature-map} )))
   )
 
+(defn create-schema
+  [experiment-name feature-map]
+  (go
+    (<! (ajaxu/post-json (str "http://localhost:5002/api/schema/" experiment-name)
+                                      {:features feature-map}))
+    (schemas/set {:uuid experiment-name :features feature-map})))
+
+(defn load-schemas
+  []
+  (go
+    (let [{:keys [schemas]} (<! (ajaxu/get-json "http://localhost:5002/api/schemas"))]
+      (doseq [schema schemas]
+        (schemas/set schema)))))
+
 (defn load-demo
   [uuid]
-  (print "loading the demo " uuid)
-  (demo/set-uuid uuid)
-  (print (demo-data/get uuid)))
+  (demo/set-uuid uuid))
+
+(defn load-experiment
+  [uuid]
+  (experiments/set-uuid uuid))
 
 (defn run-demo
   [uuid]
-  (print "running the demo " uuid)
   (go
     (<! (ajaxu/get-json (str "http://localhost:5002/api/demo/" uuid)))))
 
@@ -71,8 +87,7 @@
   [uuid]
   (go
     (let [data (<! (ajaxu/get-json (str "http://localhost:5002/api/ab/graph/results/" uuid)))]
-      (ab-convergence/set uuid data)
-      (print data))))
+      (ab-convergence/set uuid data))))
 
 (defn load-projection
   [uuid]

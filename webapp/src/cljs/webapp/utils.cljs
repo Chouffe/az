@@ -32,3 +32,9 @@
   ([s keywordize-keys?]
      (js->clj (js/JSON.parse s) :keywordize-keys keywordize-keys?)))
 
+
+(defn prevent-default
+  "Calls prevent-default on an event, then calls the input function with no
+   arguments"
+  [f]
+  (fn [event] (.preventDefault event) (f)))

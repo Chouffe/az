@@ -9,44 +9,52 @@
 
 (defn navbar
   []
-  (let [active-tab (application/get-tab)]
-    [:nav.navbar.navbar-default
-     [:div.container-fluid
-      [:div.navbar-header
-       [:a.navbar-brand {:href "#"} "A/Z Testing"]]
-      [:div.collapse.navbar-collapse
-       [:ul.nav.navbar-nav
-        [:li
-         (when (= :home active-tab)
-           {:class "active"})
-         [:a {:href "#"} "Home"]]
-        [:li.dropdown
-         (when (= :experiments active-tab)
-           {:class "active"})
-         [:a.dropdown-toggle
-          {:data-toggle "dropdown" :href "#"}
-          "Experiments "
-          [:span.caret]]
-         [:ul.dropdown-menu
-          [:li
-           [:a {:href (str "#/experiments/results/" "yo2")}
-            "yo2"]]
-          [:li.divider]
-          [:li
-           [:a {:href (str "#/experiments/new")}
-            "New experiment"]]]]
-        [:li.dropdown
-         (when (= :demo-results active-tab)
-           {:class "active"})
-         [:a.dropdown-toggle
-          {:data-toggle "dropdown" :href "#"}
-          "Demos "
-          [:span.caret]]
-         [:ul.dropdown-menu
-          (for [{:keys [uuid name]} demo-data/data]
-          [:li
-           [:a {:href (str "#/demo/" uuid)}
-            name]])]]]]]]))
+  (reagent/create-class
+    {:component-will-mount
+     (fn [_] (srv/load-schemas))
+
+     :render
+     (fn [_]
+       (let [active-tab (application/get-tab)
+             experiments (sort-by :uuid (schemas/get))]
+         [:nav.navbar.navbar-default
+          [:div.container-fluid
+           [:div.navbar-header
+            [:a.navbar-brand {:href "#"} "A/Z Testing"]]
+           [:div.collapse.navbar-collapse
+            [:ul.nav.navbar-nav
+             [:li
+              (when (= :home active-tab)
+                {:class "active"})
+              [:a {:href "#"} "Home"]]
+             [:li.dropdown
+              (when (= :experiments active-tab)
+                {:class "active"})
+              [:a.dropdown-toggle
+               {:data-toggle "dropdown" :href "#"}
+               "Experiments "
+               [:span.caret]]
+              [:ul.dropdown-menu
+               (for [{:keys [uuid]} experiments]
+               [:li
+                [:a {:href (str "#/experiments/results/" uuid)}
+                 uuid]])
+               [:li.divider]
+               [:li
+                [:a {:href (str "#/experiments/new")}
+                 "New experiment"]]]]
+             [:li.dropdown
+              (when (= :demo-results active-tab)
+                {:class "active"})
+              [:a.dropdown-toggle
+               {:data-toggle "dropdown" :href "#"}
+               "Demos "
+               [:span.caret]]
+              [:ul.dropdown-menu
+               (for [{:keys [uuid name]} demo-data/data]
+                 [:li
+                  [:a {:href (str "#/demo/" uuid)}
+                   name]])]]]]]]))}))
 
 (defn tabs
   [data]

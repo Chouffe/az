@@ -19,10 +19,8 @@
   (application/set-tab :experiments))
 
 (defroute demo-path "/experiments/results/:uuid" [uuid]
-  (print "YOOOO" uuid)
   (application/set-tab :experiment-results)
-  (print (application/get-tab))
-  )
+  (srv/load-experiment uuid))
 
 ;; Catch all
 (defroute "*" []

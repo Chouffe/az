@@ -10,8 +10,8 @@
   (swap! schema-ratom assoc-in [(keyword uuid)] schema))
 
 (defn get
-  [uuid]
-  (get-in @schema-ratom [(keyword uuid)]))
+  ([] (mapv second @schema-ratom))
+  ([uuid] (get-in @schema-ratom [(keyword uuid)])))
 
 (defn add-feature
   [uuid feature-name feature-map]

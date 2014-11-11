@@ -74,6 +74,11 @@ def get_schema(uuid):
     return db['schemas'].find_one({'uuid': uuid})
 
 
+def get_schemas():
+    """Given an uuid, it returns the schema of this uuid"""
+    return [s for s in db['schemas'].find({})]
+
+
 def delete_schema(uuid):
     """Given an uuid, it deletes the schema associated to this uuid"""
     return db['schemas'].remove({'uuid': uuid})
