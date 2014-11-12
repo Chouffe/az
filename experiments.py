@@ -10,7 +10,9 @@ landing_page = {
     'objective_function': objective_functions.obj_function_landing_page,
     'objective_function_draw': objective_functions.obj_function_landing_page_draw,
     'n_trials': 200,
-    'n_points': 200,
+    'n_points': 100,
+    'az': True,
+    'ab': True,
     'feature_names': [
         "background",
         "font_size",
@@ -40,7 +42,9 @@ landing_page2 = {
     'objective_function': objective_functions.obj_function_landing_page,
     'objective_function_draw': objective_functions.obj_function_landing_page_draw,
     'n_trials': 200,
-    'n_points': 200,
+    'n_points': 100,
+    'az': True,
+    'ab': True,
     'feature_names': [
         "background",
         "font_size",
@@ -55,7 +59,8 @@ landing_page2 = {
         "useless_text",
         "useless_link",
         "useless_column",
-        "useless_layout"
+        "useless_layout",
+        "useless_popup"
     ],
     'feature_distributions': [
         "uniform_discrete",
@@ -71,7 +76,8 @@ landing_page2 = {
         "uniform_discrete",
         "uniform_discrete",
         "uniform_discrete",
-        "uniform_discrete"
+        "uniform_discrete",
+        "binary"
     ],
     'feature_params': [
         {'low': 0, 'high': 10},
@@ -87,13 +93,62 @@ landing_page2 = {
         {'low': 0, 'high': 10},
         {'low': 0, 'high': 10},
         {'low': 0, 'high': 10},
+        {'low': 0, 'high': 10},
+        {}
+    ]
+}
+
+# Landing Page Experiment
+black_box = {
+    'uuid': 'demo3',
+    'schema_uuid': 'blackbox',
+    'objective_function': objective_functions.obj_function_black_box1,
+    'objective_function_draw': objective_functions.obj_function_black_box1,
+    'n_trials': 50,
+    'n_points': 300,
+    'az': True,
+    'ab': False,
+    'feature_names': [
+        "a1",
+        "a2",
+
+        "useless_a3",
+        "useless_a4",
+        "useless_a5",
+        "useless_a6",
+        "useless_a7",
+        "useless_a8",
+        "useless_a9"
+    ],
+    'feature_distributions': [
+        "uniform",
+        "uniform",
+
+        "uniform",
+        "uniform",
+        "uniform",
+        "uniform",
+        "uniform",
+        "uniform",
+        "uniform"
+    ],
+    'feature_params': [
+        {'low': 0, 'high': 10},
+        {'low': 0, 'high': 10},
+
+        {'low': 0, 'high': 10},
+        {'low': 0, 'high': 10},
+        {'low': 0, 'high': 10},
+        {'low': 0, 'high': 10},
+        {'low': 0, 'high': 10},
+        {'low': 0, 'high': 10},
         {'low': 0, 'high': 10}
     ]
 }
 
 
 def get_experiment(uuid):
-    experiments = [landing_page, landing_page2]
+    experiments = [landing_page, landing_page2, black_box]
     for exp in experiments:
         if exp['uuid'] == uuid:
             return exp
@@ -101,7 +156,7 @@ def get_experiment(uuid):
 
 
 def get_experiment_by_schema_uuid(schema_uuid):
-    experiments = [landing_page, landing_page2]
+    experiments = [landing_page, landing_page2, black_box]
     for exp in experiments:
         if exp['schema_uuid'] == schema_uuid:
             return exp
@@ -136,7 +191,9 @@ def run_demo(uuid):
     if experiment is None:
         return None
     else:
-        run(experiment, experiments_ab.run_experiment)
-        run(experiment, experiments_az.run_experiment)
+        if experiment['az']:
+            run(experiment, experiments_az.run_experiment)
+        if experiment['ab']:
+            run(experiment, experiments_ab.run_experiment)
 
-# run_demo('demo2')
+# run_demo('demo3')

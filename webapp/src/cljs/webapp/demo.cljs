@@ -52,7 +52,7 @@
          [:div
           (when ydata
             [graphs/scatter-plot
-             {:data (mapv vector (range) (map (partial + 3) ydata))
+             {:data (mapv vector (range) ydata)
               :ylabel "F"
               :xlabel "time"
               :lines [{:color "red"
@@ -77,7 +77,7 @@
          [:div
           (when ydata
             [graphs/scatter-plot
-             {:data (mapv vector (range) (map (partial + 3) ydata))
+             {:data (mapv vector (range) ydata)
               :ylabel "F"
               :xlabel "time"
               :path? true}])]))}))
@@ -168,6 +168,7 @@
              {:keys [schema-id tests] :as demo}
              (demo-data/get demo-uuid)]
          [:div.container
+          ;; TODO: FIXME
           #_[:div.center-block
            [:button.btn.btn-success.btn-lg
             {:on-click #(srv/run-demo demo-uuid)}

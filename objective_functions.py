@@ -73,8 +73,30 @@ def obj_function2_noisy(**kwargs):
     return obj_function2(**kwargs)
 
 
-# Real world examples
+# Black box optimization
 
+def f_ramp(x0, y0=1, c0=1):
+    # x0: where the max value is
+    # y0: max value
+    # c0: steeper
+    def f(x):
+        return max(0, y0 - np.abs(c0 * (x - x0)))
+    return f
+
+def obj_function_black_box1(a1, a2, **kwargs):
+
+    # amplitude = 10
+    # coeff = 1
+    a10 = 5
+    a20 = 3
+
+    # norm = (a1 - a10)**2 + (a2 - a20)**2
+    f1 = f_ramp(a10)
+    f2 = f_ramp(a20)
+
+    return (f1(a1) + f2(a2)) / 2
+
+# Real world examples
 
 def obj_function_landing_page(background,
                               font_size,
@@ -92,22 +114,21 @@ def obj_function_landing_page(background,
     - popup: a binary variable {0, 1} - is the popup displayed?
     """
 
-    def f_helper(x0, y0=1, c0=1):
-        def f(x):
-            return y0 - np.abs(c0 * (x - x0))
-        return f
+    popup_f = f_ramp(1, c0=10)
+    background_f = f_ramp(2)
+    font_size_f = f_ramp(5)
+    color_f = f_ramp(3)
+    number_columns_f = f_ramp(4)
 
-    popup_f = f_helper(1, c0=10)
-    background_f = f_helper(2)
-    font_size_f = f_helper(5)
-    color_f = f_helper(3)
-    number_columns_f = f_helper(4)
-
-    return float(10 * popup_f(popup) + 3 * background_f(background) + font_size_f(font_size) + \
-        color_f(color) + number_columns_f(number_columns)) / 100
+    return float(10 * popup_f(popup) \
+                 + 5 * background_f(background) \
+                 + font_size_f(font_size) \
+                 + 2 * color_f(color) \
+                 + 1.5 * number_columns_f(number_columns)) \
+        / 25
 
 
-@noisy(sigma=.25)
+@noisy(sigma=.15)
 def obj_function_landing_page_noisy(**kwargs):
     return obj_function_landing_page(**kwargs)
 

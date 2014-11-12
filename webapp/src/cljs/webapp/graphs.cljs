@@ -127,18 +127,15 @@
       [:g.domain.domain-y
        [:line {:style {"stroke" "black" "stroke-width" 2}
                :x1 0 :y1 0 :x2 0 :y2 height}]
-       [:text {:y -30 :x -20 :transform "rotate(270)"}
+       [:text {:y -30 :x -150 :transform "rotate(270)"}
         ylabel]]
       [:g.domain.domain-x {:transform (str "translate(0," height ")")}
        [:line {:style {"stroke" "black" "stroke-width" 2}
                :x1 0 :y1 0 :x2 width :y2 0}]
-       [:text {:x width
+       [:text {:x (/ width 2)
                :y (:label-x margin)}
         xlabel]]
       (when (and path? (seq xdata) (seq ydata))
-        ;; (print ylabel)
-        ;; (print xdata)
-        ;; (print ydata)
         (let [path-string-start
               (str "M" (xscale (first xdata))
                    "," (yscale (first ydata)))

@@ -157,7 +157,7 @@
 
      :render
      (fn [_]
-       (let [data (feature-importances/get schema-id)]
+       (let [data (sort-by first < (feature-importances/get schema-id))]
          [:div
           (when data
             [graphs/bar-chart
@@ -171,7 +171,7 @@
 
      :render
      (fn [_]
-       (let [data (projection/get schema-id)]
+       (let [data (sort-by first < (projection/get schema-id))]
          [:div
           (for [[xlabel {:keys [x y]}] data]
             ^{:key xlabel}
@@ -192,7 +192,7 @@
 
      :render
      (fn [_]
-       (let [data (convergence/get schema-id)]
+       (let [data (sort-by first < (convergence/get schema-id))]
        [:div
         (for [[ylabel ydata] data]
           ^{:key ylabel}
