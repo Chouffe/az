@@ -11,9 +11,7 @@ import experiments
 # TODO: kill
 from crossdomain import crossdomain
 
-app = flask.Flask(__name__,
-                  static_folder='static',
-                  static_url_path='')
+app = flask.Flask(__name__, static_url_path='')
 
 
 @app.route('/api/<string:uuid>', methods=['GET'])
@@ -181,21 +179,6 @@ def remove_feature(uuid):
     else:
         db.remove_feature(uuid, data['feature_name'])
         return json.dumps({'error': None})
-
-
-@app.route('/', methods=['GET'])
-def homepage():
-    return flask.redirect(flask.url_for('static', filename='index.html'))
-
-
-@app.route('/new', methods=['GET'])
-def experiment_new():
-    return flask.redirect(flask.url_for('static', filename='new.html'))
-
-
-@app.route('/results/<string:uuid>', methods=['GET'])
-def experiment_results(uuid):
-    return flask.redirect(flask.url_for('static', filename='results.html'))
 
 
 @app.route('/api/graph/results/<string:uuid>', methods=['GET'])

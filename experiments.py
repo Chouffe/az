@@ -196,4 +196,4 @@ def run_demo(uuid):
         if experiment['ab']:
             run(experiment, experiments_ab.run_experiment)
 
-# run_demo('demo3')
+# run_demo('demo2')

@@ -38,7 +38,9 @@ def rf_factory():
         # True: more stochastic
         bootstrap=True,
         # -1 or > 1: train in parallel
-        n_jobs=1,
+        # -1: number of cores in the machine
+        # n_jobs=1,
+        n_jobs=-1,
         # change to integer for reproducibility
         random_state=None,
     )

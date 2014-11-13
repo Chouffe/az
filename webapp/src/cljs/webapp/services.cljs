@@ -43,7 +43,7 @@
 (defn load-schemas
   []
   (go
-    (let [{:keys [schemas]} (<! (ajaxu/get-json "http://localhost:5002/api/schemas"))]
+    (let [{:keys [schemas]} (<! (ajaxu/get-json "http://localhost:5000/api/schemas"))]
       (doseq [schema schemas]
         (schemas/set schema)))))
 

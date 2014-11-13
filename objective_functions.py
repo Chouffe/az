@@ -114,18 +114,18 @@ def obj_function_landing_page(background,
     - popup: a binary variable {0, 1} - is the popup displayed?
     """
 
-    popup_f = f_ramp(1, c0=10)
+    popup_f = f_ramp(1)
     background_f = f_ramp(2)
     font_size_f = f_ramp(5)
     color_f = f_ramp(3)
     number_columns_f = f_ramp(4)
 
-    return float(10 * popup_f(popup) \
-                 + 5 * background_f(background) \
-                 + font_size_f(font_size) \
-                 + 2 * color_f(color) \
+    return float(6 * popup_f(popup) \
+                 + 3 * background_f(background) \
+                 + 3 * font_size_f(font_size) \
+                 + 2.5 * color_f(color) \
                  + 1.5 * number_columns_f(number_columns)) \
-        / 25
+        / 120
 
 
 @noisy(sigma=.15)
