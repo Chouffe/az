@@ -46,8 +46,11 @@
                             (select-keys
                               (assoc m :time recent-time)
                               [:time :mu])]))
-                       result-maps))]
-    {:results (mapv (comp :mu second) point->result-sorted-by-time)}))
+                       result-maps))
+        results (mapv (comp :mu second) point->result-sorted-by-time)]
+    {:best-results (reduce (fn [acc x] (conj acc (max (last acc) x)))
+                           [(first results)] (rest results))
+     :results results}))
 
 (defn datapoints->projection-data
   [datapoints features]

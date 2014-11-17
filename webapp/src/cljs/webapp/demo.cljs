@@ -35,32 +35,6 @@
         :ab-cost-function (assoc m :title "Cost Function")
         :feature-importances (assoc m :title "Feature Importances")))))
 
-;; TODO: move to components.cljs
-(defn demo-graph-cost-function
-  []
-  (reagent/create-class
-    {:component-will-mount
-     (fn [_]
-       (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))]
-         (srv/load-cost-function schema-id)))
-
-     :render
-     (fn [_]
-       (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))
-             ydata (cost-function/get schema-id)]
-         ;; TODO: kill + 3
-         [:div
-          (when ydata
-            [graphs/scatter-plot
-             {:data (mapv vector (range) ydata)
-              :ylabel "F"
-              :xlabel "time"
-              :lines [{:color "red"
-                       :line-width 3
-                       :title "learning"
-                       :x 50}]
-              :path? true}])]))}))
-
 (defn demo-graph-ab-cost-function
   []
   (reagent/create-class
@@ -72,13 +46,18 @@
      :render
      (fn [_]
        (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))
-             ydata (ab-cost-function/get schema-id)]
-         ;; TODO: kill + 3
+             {:keys [results best-results]} (ab-cost-function/get schema-id)]
          [:div
-          (when ydata
+          (when results
             [graphs/scatter-plot
-             {:data (mapv vector (range) ydata)
+             {:data (mapv vector (range) results)
               :ylabel "F"
+              :xlabel "time"
+              :path? true}])
+          (when best-results
+            [graphs/scatter-plot
+             {:data (mapv vector (range) best-results)
+              :ylabel "Best F"
               :xlabel "time"
               :path? true}])]))}))
 

@@ -63,14 +63,14 @@
 (defn load-cost-function
   [uuid]
   (go
-    (let [{:keys [results]} (<! (ajaxu/get-json (str "http://localhost:5000/api/graphs/az/cost-function/" uuid)))]
-      (cost-function/set uuid results))))
+    (let [{:keys [results best-results] :as m} (<! (ajaxu/get-json (str "http://localhost:5000/api/graphs/az/cost-function/" uuid)))]
+      (cost-function/set uuid m))))
 
 (defn load-ab-cost-function
   [uuid]
   (go
-    (let [{:keys [results]} (<! (ajaxu/get-json (str "http://localhost:5000/api/graphs/ab/cost-function/" uuid)))]
-      (ab-cost-function/set uuid results))))
+    (let [{:keys [results best-results] :as m} (<! (ajaxu/get-json (str "http://localhost:5000/api/graphs/ab/cost-function/" uuid)))]
+      (ab-cost-function/set uuid m))))
 
 (defn load-feature-importances
   [uuid]

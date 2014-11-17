@@ -209,12 +209,22 @@
 
      :render
      (fn [_]
-       (let [ydata (cost-function/get schema-id)]
+       (let [{:keys [results best-results]} (cost-function/get schema-id)]
          [:div
-          (when ydata
+          (when results
             [graphs/scatter-plot
-             {:data (mapv vector (range) ydata)
+             {:data (mapv vector (range) results)
               :ylabel "F"
+              :xlabel "time"
+              :lines [{:color "red"
+                       :line-width 3
+                       :title "learning"
+                       :x 50}]
+              :path? true}])
+          (when best-results
+            [graphs/scatter-plot
+             {:data (mapv vector (range) best-results)
+              :ylabel "Best F"
               :xlabel "time"
               :lines [{:color "red"
                        :line-width 3
