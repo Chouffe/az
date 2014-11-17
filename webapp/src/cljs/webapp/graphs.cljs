@@ -7,13 +7,17 @@
 
 (defn xscale
   [xmin xmax width]
-  (fn [x] (/ (* x width) (+ xmin xmax))))
+  (let [a (/ width (- xmax xmin))
+        b (* xmin (- a))]
+  (fn [x] (+ (* a x) b))))
 
 (defn yscale
   [ymin ymax height]
-  (fn [y] (if (= 0 (- ymin ymax))
+  (let [a (/ height (- ymax ymin))
+        b (* ymin (- a))]
+  (fn [y] (if (= 0 (- ymax ymin))
             height
-            (- height (/ (* y height) (+ ymin ymax))))))
+            (- height (+ (* a y) b))))))
 
 (defn bar-chart
   [{:keys [data width height ylabel]
@@ -71,7 +75,7 @@
 
 (defn scatter-plot
   [{:keys [data width height xlabel ylabel
-           xticks yticks path? lines]
+           xticks yticks path? lines ymin ymax]
     :or {width 500 height 400
          xticks 5 yticks 3
          xlabel "x" ylabel "y"
@@ -86,10 +90,10 @@
         height (- height (:top margin) (:bottom margin))
         xmin (apply min xdata)
         xmax (apply max xdata)
-        ymax (apply max ydata)
-        ymin (apply min ydata)
-        xscale (fn [x] (/ (* x width) (+ xmin xmax)))
-        yscale (fn [y] (if (= 0 (- ymin ymax)) height (- height (/ (* y height) (+ ymin ymax)))))]
+        ymin (or ymin (apply min ydata))
+        ymax (or ymax (apply max ydata))
+        xscale (xscale xmin xmax width)
+        yscale (yscale ymin ymax height)]
     [:svg {:width (+ width (:left margin) (:right margin))
            :height (+ height (:top margin) (:bottom margin))}
      [:g.chart-area
@@ -123,7 +127,7 @@
             [:text {:x (- 0 (:axis-x margin)) :y (yscale y)}
              ;; TODO: fixme
              ;; y
-             (gstring/format "%.1f" y)]]))]
+             (gstring/format "%.2f" y)]]))]
       [:g.domain.domain-y
        [:line {:style {"stroke" "black" "stroke-width" 2}
                :x1 0 :y1 0 :x2 0 :y2 height}]

@@ -53,12 +53,16 @@
              {:data (mapv vector (range) results)
               :ylabel "F"
               :xlabel "time"
+              ;; :ymin 0
+              ;; :ymax 0.25
               :path? true}])
           (when best-results
             [graphs/scatter-plot
              {:data (mapv vector (range) best-results)
               :ylabel "Best F"
               :xlabel "time"
+              ;; :ymin 0
+              ;; :ymax 0.25
               :path? true}])]))}))
 
 (defn demo-graph-convergence

@@ -216,6 +216,9 @@
              {:data (mapv vector (range) results)
               :ylabel "F"
               :xlabel "time"
+              ;; TODO: kill
+              ;; :ymin 0
+              ;; :ymax 0.25
               :lines [{:color "red"
                        :line-width 3
                        :title "learning"
@@ -226,6 +229,9 @@
              {:data (mapv vector (range) best-results)
               :ylabel "Best F"
               :xlabel "time"
+              ;; TODO kill
+              ;; :ymin 0
+              ;; :ymax 0.25
               :lines [{:color "red"
                        :line-width 3
                        :title "learning"
