@@ -6,7 +6,6 @@
 
 (defn set
   [{:keys [uuid features] :as schema}]
-  ;; (reset! schema-ratom {uuid schema})
   (swap! schema-ratom assoc-in [(keyword uuid)] schema))
 
 (defn get

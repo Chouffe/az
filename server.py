@@ -8,43 +8,24 @@ import generator
 import requests
 import random
 import experiments
-# TODO: kill
-from crossdomain import crossdomain
 
 app = flask.Flask(__name__, static_url_path='')
 
 
 @app.route('/api/<string:uuid>', methods=['GET'])
-@crossdomain(origin="http://localhost:3449")
 def next_point(uuid):
     """Given the uuid of the schema, it returns the next_point based
     on the current schema and the already seen datapoints
     eg. {feature1: value1, feature2: value2, ...}"""
     headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
     base_url = "http://localhost:%s/service/predict/" % settings.ml_service_port
-    # --------------------------------------------
-    # TODO
-    # - Generate new points to try
-    #     -> Be smarter about it
-    #     - Annealing
-    #     - Generative models
-    #     - Hill climbing methods
-    # - Fit a model based on the data already seen
-    #    -> For now a random forest
-    #    -> Extend to any Regressor by boostraping
-    #         -> Implement my own bootstraping method
-    # - Predict the best points to try next
-    #    -> Exploration vs exploitation
-    # - Return the best one
-    # --------------------------------------------
-    # Returns a random point drawn form the schema distribution
+
     schema = db.get_schema(uuid)
     features = schema['features']
     dataset = data_handling.datapoints_to_dataset(db.get_datapoints(uuid))
 
-    # TODO: use annealing for instance
     gen = generator.RandomGenerator(features)
-    number_points_to_try = random.randint(10, 100)
+    number_points_to_try = random.randint(50, 500)
     points_to_try = gen.get(n=number_points_to_try)
 
     if len(dataset) > settings.min_points_for_smbo:
@@ -97,13 +78,79 @@ def save_point(uuid):
     except:
         return json.dumps({'error': 'An error occured'})
 
-@app.route('/api/demo/<string:uuid>', methods=['GET'])
-@crossdomain(origin="http://localhost:3449")
-def run_demo(uuid):
-    # Run in another thread
-    # It kills the main one...
-    # experiments.run_demo(uuid)
-    return json.dumps({'results': 'running'})
+
+@app.route('/api/schemas', methods=['GET'])
+def get_schemas():
+    """Returns the schemas"""
+    schemas = db.get_schemas()
+
+    for schema in schemas:
+        schema.pop('_id', None)
+
+    return json.dumps({'schemas': schemas})
+
+
+@app.route('/api/schema/<string:uuid>', methods=['GET'])
+def get_schema(uuid):
+    """Returns the schema"""
+    schema = db.get_schema(uuid)
+    if not schema:
+        return json.dumps({'error': 'No schema with uuid: %s' % uuid})
+    else:
+        schema.pop('_id', None)
+        return json.dumps(schema)
+
+
+@app.route('/api/schema/<string:uuid>', methods=['POST', 'OPTIONS'])
+def create_schema(uuid):
+    """Creates a schema given the features
+    Input:
+        - features
+    """
+    data = flask.request.json
+    if not data:
+        flask.abort(400)  # bad request
+    try:
+        db.write_schema(uuid, data.get('features', []))
+    except:
+        return json.dumps({'error': 'An error occured'})
+    return json.dumps({'error': None})
+
+
+@app.route('/api/schema/<string:uuid>', methods=['DELETE'])
+def delete_schema(uuid):
+    """Deletes a schema + its datapoints"""
+    try:
+        db.delete_schema(uuid)
+        db.delete_datapoints(uuid)
+    except:
+        return json.dumps({'error': 'An error occured'})
+    return json.dumps({'error': None})
+
+
+@app.route('/api/feature/<string:uuid>', methods=['POST', 'OPTIONS'])
+def add_feature(uuid):
+    """Adds a new feature"""
+    data = flask.request.json
+    if not data:
+        flask.abort(400)  # bad request
+    try:
+        # Save the datapoint
+        db.add_feature(uuid, data)
+        return json.dumps({'error': None})
+    except:
+        return json.dumps({'error': 'An error occured'})
+
+
+@app.route('/api/feature/<string:uuid>', methods=['DELETE'])
+def remove_feature(uuid):
+    """Deletes a new feature"""
+    data = flask.request.json
+    if not data or not data.get('feature_name', None):
+        flask.abort(400)  # bad request
+    else:
+        db.remove_feature(uuid, data['feature_name'])
+        return json.dumps({'error': None})
 
 if __name__ == '__main__':
     app.run(port=settings.server_port)

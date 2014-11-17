@@ -10,6 +10,8 @@
 
 (def jsonify cheshire/generate-string)
 
+;; TODO: DOCUMENTATION
+
 ;; -------------------
 ;;      Schemas
 ;; -------------------

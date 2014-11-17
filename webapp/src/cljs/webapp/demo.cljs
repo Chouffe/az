@@ -143,13 +143,13 @@
       (if-not @running?
         [:button.btn.btn-success.btn-lg
          {:on-click #(do
-                       ;; Clean up the data
-                       (ab-convergence/delete schema-id)
+                       ;; Clean up the state
                        (convergence/delete schema-id)
                        (cost-function/delete schema-id)
-                       (ab-cost-function/delete schema-id)
                        (feature-importances/delete schema-id)
                        (projection/delete schema-id)
+                       (ab-convergence/delete schema-id)
+                       (ab-cost-function/delete schema-id)
 
                        ;; Run the experiment
                        (swap! running? not)

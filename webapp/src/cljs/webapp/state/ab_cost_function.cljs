@@ -6,7 +6,6 @@
 
 (defn set
   [uuid data]
-  ;; (reset! schema-ratom {uuid schema})
   (swap! ab-cost-function-ratom assoc-in [(keyword uuid)] data))
 
 (defn delete

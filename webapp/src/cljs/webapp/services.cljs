@@ -17,6 +17,12 @@
 
 (enable-console-print!)
 
+;; TODO: DOCUMENTATION
+
+;; -----------------
+;;   Features
+;; -----------------
+
 (defn delete-feature
   [uuid feature-name]
   (schemas/delete-feature uuid feature-name)
@@ -27,6 +33,10 @@
   (schemas/add-feature uuid feature-name feature-map)
   (go
     (<! (ajaxu/post-json (str "http://localhost:5000/api/schemas/features/" uuid "/" feature-name) feature-map ))))
+
+;; -----------------
+;;   Schemas
+;; -----------------
 
 (defn create-schema
   [experiment-name feature-map]
@@ -47,6 +57,17 @@
       (doseq [schema schemas]
         (schemas/set schema)))))
 
+(defn load-schema
+  [uuid]
+  (go
+    (let [schema (<! (ajaxu/get-json (str "http://localhost:5000/api/schemas/" uuid)))]
+      (schemas/set schema))))
+
+
+;; -----------------
+;;   Demos
+;; -----------------
+
 (defn load-demo
   [uuid]
   (demo/set-uuid uuid))
@@ -59,6 +80,10 @@
   [uuid]
   (go
     (<! (ajaxu/post-json (str "http://localhost:5000/api/demos/" uuid)))))
+
+;; -----------------
+;;   Graphs
+;; -----------------
 
 (defn load-cost-function
   [uuid]
@@ -96,11 +121,9 @@
     (let [data (<! (ajaxu/get-json (str "http://localhost:5000/api/graphs/az/projection/" uuid)))]
       (projection/set uuid data))))
 
-(defn load-schema
-  [uuid]
-  (go
-    (let [schema (<! (ajaxu/get-json (str "http://localhost:5000/api/schemas/" uuid)))]
-      (schemas/set schema))))
+;; ----------------
+;;     Main
+;; ----------------
 
 (defn get-next-point
   [uuid]

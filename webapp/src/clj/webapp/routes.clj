@@ -7,7 +7,8 @@
 
 (compojure/defroutes schema-routes
   (compojure/GET "/" [] (api/schemas-get))
-  (compojure/GET "/:schema-id" [schema-id] (api/schema-get schema-id))
+  (compojure/GET "/:schema-id" [schema-id]
+                 (api/schema-get schema-id))
   (compojure/POST "/:schema-id" [schema-id & params]
                   (api/schema-create schema-id params))
   (compojure/DELETE "/:schema-id" [schema-id]
@@ -45,8 +46,8 @@
   (compojure/context "/schemas" [] schema-routes)
   (compojure/context "/demos" [] demo-routes)
   (compojure/context "/graphs" [] graph-routes)
-  (compojure/GET "/:schema-id" [schema-id] (api/next-point schema-id))
-  (compojure/POST "/:schema-id" [schema-id & params] (str "yooo" schema-id "  " params)))
+  (compojure/GET "/:schema-id" [schema-id]
+                 (api/next-point schema-id)))
 
 (compojure/defroutes app
   (compojure/context "/api" [] api-routes)
