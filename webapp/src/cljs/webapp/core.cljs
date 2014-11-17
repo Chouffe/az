@@ -16,12 +16,6 @@
 
 (enable-console-print!)
 
-;; TEST
-;; TODO: kill
-(go
-(let [response (<! (ajaxu/get-json "http://localhost:5002/api/lp2"))]
-  (println response)))
-
 (def tab->page
   {:home webapp.home/home-comp
    :experiments webapp.experiments/experiments-comp
@@ -37,7 +31,7 @@
         [components/navbar]
         [(get tab->page (application/get-tab) :div)]])}))
 
-(fw/watch-and-reload
+#_(fw/watch-and-reload
   ;; :websocket-url "ws://localhost:3449/figwheel-ws" default
   :jsload-callback (fn [] (print "reloaded"))) ;; optional callback
 

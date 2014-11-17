@@ -41,6 +41,7 @@
         ring.middleware.keyword-params/wrap-keyword-params
         ring.middleware.json/wrap-json-params
         ring.middleware.params/wrap-params
+        ;; TODO: kill
         wrap-allow-cross-origin
         wrap-allow-credentials
         wrap-request-logging)

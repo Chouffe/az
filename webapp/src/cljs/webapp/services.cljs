@@ -20,25 +20,25 @@
 (defn delete-feature
   [uuid feature-name]
   (schemas/delete-feature uuid feature-name)
-  (http/delete (str "http://localhost:5002/api/feature/" uuid)
-               {:json-params {:feature_name feature-name}
-                :headers {"content-type" "application/json"
-                          "accept" "application/json"}}))
+  (http/delete (str "http://localhost:5000/api/schemas/features/" uuid "/" (name feature-name))))
 
 (defn add-feature
   [uuid feature-name feature-map]
   (schemas/add-feature uuid feature-name feature-map)
   (go
-    (<! (ajaxu/post-json (str "http://localhost:5002/api/feature/" uuid)
-                                      {feature-name feature-map} )))
-  )
+    (<! (ajaxu/post-json (str "http://localhost:5000/api/schemas/features/" uuid "/" feature-name) feature-map ))))
 
 (defn create-schema
   [experiment-name feature-map]
   (go
-    (<! (ajaxu/post-json (str "http://localhost:5002/api/schema/" experiment-name)
+    (<! (ajaxu/post-json (str "http://localhost:5000/api/schemas/" experiment-name)
                                       {:features feature-map}))
     (schemas/set {:uuid experiment-name :features feature-map})))
+
+(defn delete-schema
+  [uuid]
+  (http/delete (str "http://localhost:5000/api/schemas/" uuid))
+  (schemas/delete uuid))
 
 (defn load-schemas
   []
@@ -58,50 +58,51 @@
 (defn run-demo
   [uuid]
   (go
-    (<! (ajaxu/get-json (str "http://localhost:5002/api/demo/" uuid)))))
+    (<! (ajaxu/post-json (str "http://localhost:5000/api/demos/" uuid)))))
 
 (defn load-cost-function
   [uuid]
   (go
-    (let [{:keys [results]} (<! (ajaxu/get-json (str "http://localhost:5002/api/graph/obj-function/" uuid)))]
+    (let [{:keys [results]} (<! (ajaxu/get-json (str "http://localhost:5000/api/graphs/az/cost-function/" uuid)))]
       (cost-function/set uuid results))))
 
 (defn load-ab-cost-function
   [uuid]
   (go
-    (let [{:keys [results]} (<! (ajaxu/get-json (str "http://localhost:5002/api/ab/graph/obj-function/" uuid)))]
+    (let [{:keys [results]} (<! (ajaxu/get-json (str "http://localhost:5000/api/graphs/ab/cost-function/" uuid)))]
       (ab-cost-function/set uuid results))))
 
 (defn load-feature-importances
   [uuid]
   (go
-    (let [data (<! (ajaxu/get-json (str "http://localhost:5002/api/graph/feature-importances/" uuid)))]
+    (let [data (<! (ajaxu/get-json (str "http://localhost:5000/api/graphs/az/feature-importances/" uuid)))]
       (feature-importances/set uuid data))))
 
 (defn load-convergence
   [uuid]
   (go
-    (let [data (<! (ajaxu/get-json (str "http://localhost:5002/api/graph/results/" uuid)))]
+    (let [data (<! (ajaxu/get-json (str "http://localhost:5000/api/graphs/az/convergence/" uuid)))]
       (convergence/set uuid data))))
 
 (defn load-ab-convergence
   [uuid]
   (go
-    (let [data (<! (ajaxu/get-json (str "http://localhost:5002/api/ab/graph/results/" uuid)))]
+    (let [data (<! (ajaxu/get-json (str "http://localhost:5000/api/graphs/ab/convergence/" uuid)))]
       (ab-convergence/set uuid data))))
 
 (defn load-projection
   [uuid]
   (go
-    (let [data (<! (ajaxu/get-json (str "http://localhost:5002/api/graph/obj/" uuid)))]
+    (let [data (<! (ajaxu/get-json (str "http://localhost:5000/api/graphs/az/projection/" uuid)))]
       (projection/set uuid data))))
 
 (defn load-schema
   [uuid]
   (go
-    (let [schema (<! (ajaxu/get-json (str "http://localhost:5002/api/schema/" uuid)))]
+    (let [schema (<! (ajaxu/get-json (str "http://localhost:5000/api/schemas/" uuid)))]
       (schemas/set schema))))
 
+;; TODO: use 5000
 (defn get-next-point
   [uuid]
   (go

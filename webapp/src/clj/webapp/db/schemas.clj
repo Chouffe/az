@@ -14,3 +14,8 @@
 (defn remove-by-uuid
   [uuid]
   (mc/remove db/db "schemas" {:uuid uuid}))
+
+(defn insert
+  [uuid features]
+  (mc/insert db/db "schemas" {:uuid uuid
+                              :features features}))

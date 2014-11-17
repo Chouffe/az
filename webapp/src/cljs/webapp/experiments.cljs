@@ -100,12 +100,14 @@
   [uuid active-tab tab-kw]
   (when (#{:convergence
            :feature-importances
+           :cost-function
            :projection} tab-kw)
     (let [m {:on-click #(experiments/set-tab uuid tab-kw)
              :active? (= active-tab tab-kw)}]
       (case tab-kw
         :projection (assoc m :title "Projection")
         :convergence (assoc m :title "Convergence")
+        :cost-function (assoc m :title "Cost Function")
         :feature-importances (assoc m :title "Feature Importances")))))
 
 (defn experiment-graph
@@ -121,11 +123,14 @@
       :feature-importances
       [components/graph-feature-importances uuid]
 
+      :cost-function
+      [components/graph-cost-function uuid]
+
       [:div "Select a tab..."])))
 
 (defn experiment-results-comp
   []
-  (let [tabs [:convergence :projection :feature-importances]]
+  (let [tabs [:convergence :projection :feature-importances :cost-function]]
   (reagent/create-class
     {:component-will-mount
      (fn [_] (do
@@ -143,15 +148,17 @@
           (when uuid
             [components/schema-component uuid])
           (when next-point
-            [:div
-             [components/panel-comp
-              {:title "Next point to try"
-               :body (pr-str (next-point/get uuid))
-               :footer (str "$ curl " api-url uuid)}]
-             [components/panel-comp
-              {:title "Save a result"
-               :body (pr-str (assoc (next-point/get uuid) :result 42))
-               :footer (str "$ curl -X POST -H \"Content-Type: application/json\" -d " next-point-result " " api-url uuid)}]])
+            [:div.row
+             [:div.col-md-6
+              [components/panel-comp
+               {:title "Next point to try"
+                :body (pr-str (next-point/get uuid))
+                :footer (str "$ curl " api-url uuid)}]]
+             [:div.col-md-6
+              [components/panel-comp
+               {:title "Save a result"
+                :body (pr-str (assoc (next-point/get uuid) :result 42))
+                :footer (str "$ curl -X POST -H \"Content-Type: application/json\" -d " next-point-result " " api-url uuid)}]]])
 
           [components/tabs (mapv (partial tabs-data uuid active-tab) tabs)]
           [experiment-graph uuid]]))})))

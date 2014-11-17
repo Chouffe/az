@@ -4,7 +4,7 @@
   [xs]
   (if-not (seq xs)
     0
-    (/ (reduce + xs) (count xs))))
+    (/ (float (reduce + xs)) (count xs))))
 
 (defn sqrt
   [x]
@@ -12,13 +12,13 @@
     (js/Math.sqrt x)))
 
 (defn std
-  [s]
-  (let [m (mean s)]
+  [xs]
+  (let [m (mean xs)]
     (sqrt
-      (/ (reduce + (map #(* (- % m)
+      (/ (float (reduce + (map #(* (- % m)
                             (- % m))
-                        s))
-         (count s)))))
+                        xs)))
+         (count xs)))))
 
 (defn scale-for-bar-charts
   [data]

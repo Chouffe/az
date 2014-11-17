@@ -110,7 +110,7 @@
      (fn [_]
        (let [{:keys [schema-id]} (demo-data/get (demo/get-uuid))]
          [:div
-          (for [[ylabel ydata] (ab-convergence/get schema-id)]
+          (for [[ylabel ydata] (sort-by first < (ab-convergence/get schema-id))]
             ^{:key ylabel}
             [graphs/single-graph-comp ylabel ydata])]))}))
 
@@ -126,7 +126,7 @@
       [demo-graph-ab-convergence]
 
       :cost-function
-      [demo-graph-cost-function]
+      [components/graph-cost-function schema-id]
 
       :ab-cost-function
       [demo-graph-ab-cost-function]

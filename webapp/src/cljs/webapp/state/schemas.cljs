@@ -13,6 +13,10 @@
   ([] (mapv second @schema-ratom))
   ([uuid] (get-in @schema-ratom [(keyword uuid)])))
 
+(defn delete
+  [uuid]
+  (swap! schema-ratom dissoc (keyword uuid)))
+
 (defn add-feature
   [uuid feature-name feature-map]
   (set (assoc-in (get uuid)
@@ -24,23 +28,3 @@
   (let [schema (get uuid)
         new-features (dissoc (:features schema) (keyword feature-name))]
     (set (assoc schema :features new-features))))
-
-(set
-  {:uuid "test"
-   :features {"a1" {:distribution "uniform"
-                    :default 0
-                    :params {"high" 0
-                             "low" 1}}
-              "a0" {:distribution "uniform"
-                    :default 0
-                    :params {"high" 0
-                             "low" 1}}
-              "a2" {:distribution "uniform"
-                    :default 0
-                    :params {"high" 0
-                             "low" 1}}
-              "a3" {:distribution "uniform"
-                    :default 0
-                    :params {"high" 0
-                             "low" 1}}
-              }})

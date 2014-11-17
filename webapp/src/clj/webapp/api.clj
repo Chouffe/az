@@ -1,6 +1,12 @@
 (ns webapp.api
   (:require [webapp.db.schemas :as db-schemas]
-            [cheshire.core :as cheshire]))
+            [webapp.db.features :as db-features]
+            [webapp.db.datapoints :as db-datapoints]
+            [webapp.db.abdatapoints :as db-abdatapoints]
+            [webapp.utils.data :as datau]
+            [clj-http.client :as client]
+            [cheshire.core :as cheshire]
+            [clojure.string :as string]))
 
 (def jsonify cheshire/generate-string)
 
@@ -23,6 +29,12 @@
 (defn schema-delete
   [uuid]
   (db-schemas/remove-by-uuid uuid)
+  (db-datapoints/delete-by-uuid uuid)
+  (jsonify {:error nil}))
+
+(defn schema-create
+  [uuid {:keys [features]}]
+  (db-schemas/insert uuid features)
   (jsonify {:error nil}))
 
 ;; -------------------
@@ -30,14 +42,25 @@
 ;; -------------------
 
 (defn feature-add
-  [uuid feature-map]
-  ;; todo
-  nil)
+  [uuid feature-name {:keys [default distribution params] :as feature-map}]
+  {:pre [distribution feature-name]}
+  (let [default (if-not (string/blank? default)
+                  default
+                  0)
+        params (if-not params
+                 {}
+                  params)
+        feature-map {(keyword feature-name)
+                     {:default default
+                      :distribution distribution
+                      :params params}}]
+    (db-features/add-feature uuid feature-map)
+    (jsonify {:error nil})))
 
 (defn feature-remove
   [uuid feature-name]
-  ;; todo
-  nil)
+  (db-features/remove-feature uuid feature-name)
+  (jsonify {:error nil}))
 
 ;; -------------------
 ;;      Demos
@@ -49,27 +72,35 @@
 ;;      Graphs
 ;; -------------------
 
-;; TODO
-
 (defn graph-projection
   [uuid]
-  ;; todo
-  nil)
+  (when-let [{:keys [features]} (db-schemas/get-by-uuid uuid)]
+    (when-let [datapoints (db-datapoints/get-by-uuid uuid)]
+      (jsonify
+        (datau/datapoints->projection-data datapoints features)))))
 
 (defn graph-convergence
-  [uuid]
-  ;; todo
-  nil)
+  ([uuid] (graph-convergence uuid false))
+  ([uuid ab-testing?]
+   (when-let [{:keys [features]} (db-schemas/get-by-uuid uuid)]
+     (when-let [datapoints (if ab-testing?
+                             (db-abdatapoints/get-by-uuid uuid)
+                             (db-datapoints/get-by-uuid uuid))]
+       (jsonify
+         (datau/datapoints->convergence-data datapoints features))))))
 
 (defn graph-cost-function
-  [uuid]
-  ;; todo
-  nil)
+  ([uuid] (graph-cost-function uuid false))
+  ([uuid ab-testing?]
+   (when-let [datapoints (if ab-testing?
+                           (db-abdatapoints/get-by-uuid uuid)
+                           (db-datapoints/get-by-uuid uuid))]
+     (jsonify
+       (datau/datapoints->cost-function-data datapoints)))))
 
 (defn graph-feature-importances
   [uuid]
-  ;; todo
-  nil)
+  (client/get (str "http://localhost:5003/service/feature-importances/" uuid)))
 
 ;; ----------------
 ;;     Main

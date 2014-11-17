@@ -3,6 +3,7 @@
             [cljs.reader :as reader]
             [webapp.state.schemas :as schemas]
             [webapp.state.convergence :as convergence]
+            [webapp.state.cost-function :as cost-function]
             [webapp.state.projection :as projection]
             [webapp.state.application :as application]
             [webapp.services :as srv]
@@ -199,3 +200,24 @@
           (if (pos? (count ydata))
             [graphs/single-graph-comp ylabel ydata true]
             [:div]))]))}))
+
+(defn graph-cost-function
+  [schema-id]
+  (reagent/create-class
+    {:component-will-mount
+     (fn [_] (srv/load-cost-function schema-id))
+
+     :render
+     (fn [_]
+       (let [ydata (cost-function/get schema-id)]
+         [:div
+          (when ydata
+            [graphs/scatter-plot
+             {:data (mapv vector (range) ydata)
+              :ylabel "F"
+              :xlabel "time"
+              :lines [{:color "red"
+                       :line-width 3
+                       :title "learning"
+                       :x 50}]
+              :path? true}])]))}))
