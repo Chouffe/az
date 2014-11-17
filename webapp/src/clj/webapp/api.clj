@@ -66,7 +66,10 @@
 ;;      Demos
 ;; -------------------
 
-;; TODO
+(defn demo-run
+  [demo-id]
+  (when-let [request (future (client/post (str "http://localhost:5004/service/demo/" demo-id)))]
+    (jsonify {:demo "running"})))
 
 ;; -------------------
 ;;      Graphs

@@ -136,6 +136,20 @@
           [components/tabs (mapv (partial tabs-data uuid active-tab) tabs)]
           [demo-graph uuid]]))}))
 
+(defn demo-button-run
+  [demo-uuid]
+  (let [running? (reagent/atom false)]
+    (fn []
+      (if-not @running?
+        [:button.btn.btn-success.btn-lg
+         {:on-click #(do
+                       (swap! running? not)
+                       (srv/run-demo demo-uuid))}
+         "Run Demo"]
+        [:button.btn.btn-success.btn-lg
+         {:disabled "disabled"}
+         "Running"]))))
+
 (defn demo-results-comp
   []
   (reagent/create-class
@@ -151,12 +165,9 @@
              {:keys [schema-id tests] :as demo}
              (demo-data/get demo-uuid)]
          [:div.container
-          ;; TODO: FIXME
-          #_[:div.center-block
-           [:button.btn.btn-success.btn-lg
-            {:on-click #(srv/run-demo demo-uuid)}
-            "Run"]]
           [components/schema-component schema-id]
+          [:div.center-block.text-center
+           [demo-button-run demo-uuid]]
           [:div.row
            (for [{:keys [uuid] :as test} tests]
              ^{:key uuid}

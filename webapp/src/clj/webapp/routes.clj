@@ -19,9 +19,7 @@
                       (api/feature-remove schema-id feature-name))))
 
 (compojure/defroutes demo-routes
-  (compojure/POST "/:demo-id" [demo-id]
-                  ;; TODO
-                  (str "running demo: " demo-id)))
+  (compojure/POST "/:demo-id" [demo-id] (api/demo-run demo-id)))
 
 (compojure/defroutes az-graph-routes
   (compojure/GET "/convergence/:schema-id" [schema-id]
