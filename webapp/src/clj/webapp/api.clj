@@ -108,10 +108,5 @@
 
 (defn next-point
   [uuid]
-  ;; TODO
-  nil )
-
-(defn save-point
-  [uuid point]
-  ;; TODO
-  nil)
+  (when-let [result (client/get (str "http://localhost:5002/api/" uuid))]
+    (:body result)))

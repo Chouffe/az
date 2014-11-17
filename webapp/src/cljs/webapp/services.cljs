@@ -102,9 +102,8 @@
     (let [schema (<! (ajaxu/get-json (str "http://localhost:5000/api/schemas/" uuid)))]
       (schemas/set schema))))
 
-;; TODO: use 5000
 (defn get-next-point
   [uuid]
   (go
-    (let [point (<! (ajaxu/get-json (str "http://localhost:5002/api/" uuid)))]
+    (let [point (<! (ajaxu/get-json (str "http://localhost:5000/api/" uuid)))]
       (next-point/set uuid point))))

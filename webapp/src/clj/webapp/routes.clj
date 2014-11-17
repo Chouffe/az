@@ -46,7 +46,9 @@
 (compojure/defroutes api-routes
   (compojure/context "/schemas" [] schema-routes)
   (compojure/context "/demos" [] demo-routes)
-  (compojure/context "/graphs" [] graph-routes))
+  (compojure/context "/graphs" [] graph-routes)
+  (compojure/GET "/:schema-id" [schema-id] (api/next-point schema-id))
+  (compojure/POST "/:schema-id" [schema-id & params] (str "yooo" schema-id "  " params)))
 
 (compojure/defroutes app
   (compojure/context "/api" [] api-routes)
