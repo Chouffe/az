@@ -6,8 +6,11 @@
 
 (defn set
   [uuid data]
-  ;; (reset! schema-ratom {uuid schema})
   (swap! convergence-ratom assoc-in [(keyword uuid)] data))
+
+(defn delete
+  [uuid]
+  (swap! convergence-ratom dissoc (keyword uuid)))
 
 (defn get
   [uuid]

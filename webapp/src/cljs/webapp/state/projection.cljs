@@ -8,6 +8,10 @@
   [uuid data]
   (swap! projection-ratom assoc-in [(keyword uuid)] data))
 
+(defn delete
+  [uuid]
+  (swap! projection-ratom dissoc (keyword uuid)))
+
 (defn get
   [uuid]
   (get-in @projection-ratom [(keyword uuid)]))

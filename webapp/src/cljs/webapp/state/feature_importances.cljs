@@ -6,8 +6,11 @@
 
 (defn set
   [uuid data]
-  ;; (reset! schema-ratom {uuid schema})
   (swap! feature-importances-ratom assoc-in [(keyword uuid)] data))
+
+(defn delete
+  [uuid]
+  (swap! feature-importances-ratom dissoc (keyword uuid)))
 
 (defn get
   [uuid]

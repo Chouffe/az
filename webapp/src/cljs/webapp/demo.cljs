@@ -137,12 +137,21 @@
           [demo-graph uuid]]))}))
 
 (defn demo-button-run
-  [demo-uuid]
+  [demo-uuid schema-id]
   (let [running? (reagent/atom false)]
     (fn []
       (if-not @running?
         [:button.btn.btn-success.btn-lg
          {:on-click #(do
+                       ;; Clean up the data
+                       (ab-convergence/delete schema-id)
+                       (convergence/delete schema-id)
+                       (cost-function/delete schema-id)
+                       (ab-cost-function/delete schema-id)
+                       (feature-importances/delete schema-id)
+                       (projection/delete schema-id)
+
+                       ;; Run the experiment
                        (swap! running? not)
                        (srv/run-demo demo-uuid))}
          "Run Demo"]
@@ -167,7 +176,7 @@
          [:div.container
           [components/schema-component schema-id]
           [:div.center-block.text-center
-           [demo-button-run demo-uuid]]
+           [demo-button-run demo-uuid schema-id]]
           [:div.row
            (for [{:keys [uuid] :as test} tests]
              ^{:key uuid}

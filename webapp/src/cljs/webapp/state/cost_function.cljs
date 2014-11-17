@@ -9,6 +9,10 @@
   ;; (reset! schema-ratom {uuid schema})
   (swap! cost-function-ratom assoc-in [(keyword uuid)] data))
 
+(defn delete
+  [uuid]
+  (swap! cost-function-ratom dissoc (keyword uuid)))
+
 (defn get
   [uuid]
   (get-in @cost-function-ratom [(keyword uuid)]))

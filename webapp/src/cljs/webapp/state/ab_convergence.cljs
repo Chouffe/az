@@ -9,6 +9,10 @@
   ;; (reset! schema-ratom {uuid schema})
   (swap! ab-convergence-ratom assoc-in [(keyword uuid)] data))
 
+(defn delete
+  [uuid]
+  (swap! ab-convergence-ratom dissoc (keyword uuid)))
+
 (defn get
   [uuid]
   (get-in @ab-convergence-ratom [(keyword uuid)]))
