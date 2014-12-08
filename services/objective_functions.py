@@ -1,6 +1,7 @@
-import random
-import utils
 import numpy as np
+import random
+
+import utils
 
 # ----------------------------------
 # Decorators to transform the signal
@@ -22,12 +23,7 @@ def draw(function):
     def f(**kwargs):
         rand = random.random()
         x = function(**kwargs)
-        if rand < x:
-            # Success
-            return 1
-        else:
-            # Failure
-            return 0
+        return int(rand < x)
     return f
 
 # ---------------------
@@ -83,6 +79,7 @@ def f_ramp(x0, y0=1, c0=1):
         return max(0, y0 - np.abs(c0 * (x - x0)))
     return f
 
+
 def obj_function_black_box1(a1, a2, **kwargs):
 
     # amplitude = 10
@@ -96,8 +93,8 @@ def obj_function_black_box1(a1, a2, **kwargs):
 
     return (f1(a1) + f2(a2)) / 2
 
-# Real world examples
 
+# Real world examples
 def obj_function_landing_page(background,
                               font_size,
                               color,
@@ -120,12 +117,12 @@ def obj_function_landing_page(background,
     color_f = f_ramp(3)
     number_columns_f = f_ramp(4)
 
-    return float(6 * popup_f(popup) \
-                 + 3 * background_f(background) \
-                 + 3 * font_size_f(font_size) \
-                 + 2.5 * color_f(color) \
-                 + 1.5 * number_columns_f(number_columns)) \
-        / 120
+    return float(6 * popup_f(popup)
+                 + 3 * background_f(background)
+                 + 3 * font_size_f(font_size)
+                 + 2.5 * color_f(color)
+                 + 1.5 * number_columns_f(number_columns)
+                 ) / 120
 
 
 @noisy(sigma=0.001)

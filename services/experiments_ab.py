@@ -1,6 +1,7 @@
-import utils
-import api
 import itertools
+
+import api
+import utils
 
 
 def init_experiment(number_features,

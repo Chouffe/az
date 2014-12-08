@@ -30,9 +30,9 @@ class RandomGenerator(Generator):
         """Randomly generates n values based on the distribution
         of the feature"""
         feature = self.features[feature_name]
-        distribution = DISTRIBUTIONS[feature['distribution']](**feature['params'])
+        distribution = DISTRIBUTIONS[feature['distribution']](
+            **feature['params'])
         return distribution.generate(n)
-
 
     def get(self, n=1):
         """Randomly generates n points based on the distributions
@@ -45,14 +45,3 @@ class RandomGenerator(Generator):
                 point[k] = distribution.generate(1)[0]
             points.append(point)
         return points
-
-
-# Example
-# r = RandomGenerator({
-#         'a': {'distribution': 'normal', 'params': {'mu': 10, 'sigma': 3}},
-#         'c': {'distribution': 'uniform', 'params': {'low': 4, 'high': 5}},
-#         'd': {'distribution': 'binary', 'params': {}},
-#         'b': {'distribution': 'normal', 'params': {'mu': 1, 'sigma': .5}}
-#     })
-#
-# print r.get()

@@ -1,12 +1,13 @@
 import abc
-import db
-import generator
 import json
 import random
 import requests
+from abba.stats import Experiment as ABExperiment
+
+import db
+import generator
 import settings
 import utils
-from abba.stats import Experiment as ABExperiment
 from distributions import generate_random_from_feature
 from distributions import get_default_params
 
@@ -46,7 +47,6 @@ class ABTesting(ApiBase):
             self.uuid = utils.uuid()
         self.features = features
         # Dataset of tuples (point, result)
-        # TODO: improve the way we store the points to improve efficiency
         self.datapoints = []
 
         # It keeps the baseline point and the variation point
@@ -68,10 +68,12 @@ class ABTesting(ApiBase):
         assert self._current_variation_feature_name
 
         rg = generator.RandomGenerator(self.features)
-        random_values = set([rg.get_for_feature(self._current_variation_feature_name)[0]
-                             for _ in range(100)])
+        random_values = set([rg.get_for_feature(
+            self._current_variation_feature_name)[0]
+            for _ in range(100)])
 
-        baseline_value = self._current_baseline_point[self._current_variation_feature_name]
+        baseline_value = self._current_baseline_point[
+            self._current_variation_feature_name]
         if baseline_value in random_values:
             random_values.remove(baseline_value)
 
@@ -115,7 +117,6 @@ class ABTesting(ApiBase):
         """Given a point, it generates the next one"""
 
         next_point = point.copy()
-
         assert len(self.features.keys()) > 0
 
         # If all the features have been explored
@@ -134,19 +135,10 @@ class ABTesting(ApiBase):
             self._generate_variation_feature_values()
             self._explored_feature_names.add(self._current_variation_feature_name)
 
-        # If the current feature name is not in the explored set
-        # if self._current_variation_feature_name not in self._explored_feature_names:
-            # self._generate_variation_feature_values()
-            # self._current_variation_feature_name.add(self._current_variation_feature_name)
-
         # Should be able to get a feature value
         assert len(self._current_variation_feature_values) > 0
 
         next_point[self._current_variation_feature_name] = self._current_variation_feature_values.pop()
-
-        # print next_point
-        # print self._current_baseline_point
-
         return next_point
 
     def _get_successes_and_trials(self, point):
@@ -161,12 +153,8 @@ class ABTesting(ApiBase):
         num_variations: number of different variations of experiment
         """
         baseline_num_successes, baseline_num_trials = self._get_successes_and_trials(self._current_baseline_point)
-        num_successes, num_trials = self._get_successes_and_trials(self._current_variation_point)
-        # Debugging
-        # print "BASELINE: ", baseline_num_successes, baseline_num_trials
-        # print self._current_baseline_point
-        # print "VARIATION: ", num_successes, num_trials
-        # print self._current_variation_point
+        num_successes, num_trials = self._get_successes_and_trials(
+            self._current_variation_point)
         experiment = ABExperiment(num_variations,
                                   baseline_num_successes,
                                   baseline_num_trials,
@@ -179,13 +167,9 @@ class ABTesting(ApiBase):
     def _is_ab_test_success(self):
         try:
             p_value, rel_improvement = self._ab_test()
-            # Debugging
-            # print "P VALUE: ", p_value
-            # print "REL IMPROVEMENT: ", rel_improvement
             # Basic heuristic to keep the variation over the baseline
             return p_value <= .05 and rel_improvement > 0
         except ZeroDivisionError:
-            print "Division by Zero"
             return False
 
     def set_baseline(self, point):
@@ -197,29 +181,19 @@ class ABTesting(ApiBase):
     def set_variation_feature(self, feature_name):
         self._current_variation_feature = feature_name
 
-    # TODO: change it to use the vary only one feature at a time
     def get_candidate(self, **kwargs):
         """Returns the candidate point to try next"""
         # if no baseline has been defined
         if not self._current_baseline_point:
-            # Debugging
-            print "Setting the baseline"
             self._current_baseline_point = self._generate_random_point()
             return self._current_baseline_point
         # if no variation point has been defined
         elif not self._current_variation_point:
-            # Debugging
-            print "Setting the variation"
             self._current_variation_point = self._generate_next_point(self._current_baseline_point)
             return self._current_variation_point
         else:
             if self._is_ab_test_success():
-                # Debugging
-                print "AB TEST SUCCESS"
                 self._current_baseline_point = self._current_variation_point
-            # else:
-                # Debugging
-                # print "AB TEST FAILURE"
 
             self._current_variation_point = self._generate_next_point(self._current_baseline_point)
             return self._current_variation_point
@@ -239,6 +213,7 @@ class AZTesting(ApiBase):
         else:
             self.uuid = utils.uuid()
         self.features = features
+
         # Dataset of tuples (point, result)
         self.datapoints = []
         self._load_schema()
@@ -254,14 +229,9 @@ class AZTesting(ApiBase):
         # Otherwise we create a new schema with no features
         else:
             r = requests.post(schema_url + self.uuid,
-                              # TODO: fixme
                               data=json.dumps({'features': {}}),
                               headers=headers)
             return self._load_schema()
-
-    # def __del__(self):
-    #     """Deletes the entries in the DB"""
-    #     requests.delete(schema_url + self.uuid)
 
     def delete(self):
         """Deletes the entries in the DB"""

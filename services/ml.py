@@ -1,7 +1,8 @@
-from distributions import generate_random
 import numpy as np
 from scipy.stats import norm
 from sklearn.ensemble import RandomForestRegressor
+
+from distributions import generate_random
 
 
 def random_search(features, n=1):
@@ -46,7 +47,6 @@ def rf_factory():
     )
 
 
-# TODO: Try other formulas
 def expected_improvement(f_min, mu, sigma):
     """
     Takes in mu as an array of means and sigma as an

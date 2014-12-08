@@ -1,12 +1,13 @@
 import flask
-import settings
 import json
-import db
-import ml
-import data_handling
-import generator
-import requests
 import random
+import requests
+
+import data_handling
+import db
+import generator
+import ml
+import settings
 
 app = flask.Flask(__name__, static_url_path='')
 
@@ -24,7 +25,7 @@ def next_point(uuid):
     dataset = data_handling.datapoints_to_dataset(db.get_datapoints(uuid))
 
     gen = generator.RandomGenerator(features)
-    number_points_to_try = random.randint(50, 500)
+    number_points_to_try = random.randint(100, 1000)
     points_to_try = gen.get(n=number_points_to_try)
 
     if len(dataset) > settings.min_points_for_smbo:
@@ -67,7 +68,9 @@ def save_point(uuid):
     input_feature_set = set(features)
     if schema_feature_set != input_feature_set:
         return json.dumps({'error':
-                           'Error in the input -> The datapoints lacks some keys %s' % (schema_feature_set - input_feature_set)})
+                           'Error in the input -> The datapoints lacks \
+                           some keys %s' % (schema_feature_set -
+                                            input_feature_set)})
     if not data or result is None or not features:
         flask.abort(400)  # bad request
     try:

@@ -1,7 +1,7 @@
 import flask
+import json
 
 import settings
-import json
 import db
 import ml
 import utils

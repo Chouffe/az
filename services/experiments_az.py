@@ -1,11 +1,15 @@
-import utils
+import itertools
+
 import api
 import db
-import itertools
-import time
+import utils
 
 
-def init_experiment(number_features, uuid='aztest', feature_distributions=[]):
+def init_experiment(number_features,
+                    uuid='aztest',
+                    feature_names=[],
+                    feature_distributions=[],
+                    feature_params=[]):
 
     az = api.AZTesting(uuid)
 
@@ -13,12 +17,20 @@ def init_experiment(number_features, uuid='aztest', feature_distributions=[]):
     if not feature_distributions:
         feature_distributions = itertools.repeat('binary')
 
+    if not feature_names:
+        feature_names = ['a' + str(n) for n in range(1, number_features + 1)]
+
+    if not feature_params:
+        feature_params = itertools.repeat(None)
+
     # Add the features
-    for feature_name, d in zip(['a' + str(n)
-                                for n in range(1, number_features + 1)],
-                               feature_distributions):
-        # Only binary features for now
-        az.add_feature(feature_name, d)
+    for feature_name, d, params in zip(feature_names,
+                                       feature_distributions,
+                                       feature_params):
+        if params:
+            az.add_feature(feature_name, d, params=params)
+        else:
+            az.add_feature(feature_name, d)
 
     return az
 
@@ -33,14 +45,17 @@ def run_experiment(objective_function,
                    number_trials,
                    number_features,
                    uuid='aztest',
-                   feature_distributions=[]):
+                   feature_names=[],
+                   feature_distributions=[],
+                   feature_params=[]):
 
     delete_experiment(uuid)
     az = init_experiment(number_features,
                          uuid=uuid,
-                         feature_distributions=feature_distributions)
+                         feature_names=feature_names,
+                         feature_distributions=feature_distributions,
+                         feature_params=feature_params)
 
-    # Initialize the az testing
     explored_points = []
 
     # AZ/ Testing
@@ -67,23 +82,3 @@ def run_experiment(objective_function,
             datapoints,
             best_point,
             best_score)
-
-# -------------------
-# Set of experiments
-# -------------------
-
-# results = []
-# N = 100
-# for i in range(N):
-#     print "Running experiment #", i
-#     results.append(run_experiment(utils.obj_function_draw, 5, 200, 40))
-# run_experiment(utils.hyperplane_draw, 16, 200, 5)
-# results = run_experiment(utils.obj_function_draw, 100, 200, 100, feature_distributions=itertools.repeat('uniform'))
-# utils.format_results(*results, features_to_show=['a1', 'a2', 'a3'])
-
-# run_experiment(utils.obj_function_2_draw, 150, 200, 40, 'aztest1', itertools.repeat('uniform'))
-# run_experiment(utils.obj_function_5, 200, 30, 20, uuid='srv2', feature_distributions=itertools.repeat('uniform'))
-run_experiment(utils.obj_function_9, 200, 50, 3, uuid='boo', feature_distributions=itertools.repeat('uniform'))
-
-# TODO: Save results somewhere
-# utils.format_multiple_results(results)

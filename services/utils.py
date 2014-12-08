@@ -1,6 +1,6 @@
 import datetime
-import random
 import numpy as np
+import random
 from uuid import uuid1
 
 
@@ -34,12 +34,7 @@ def draw(function):
     def f(**kwargs):
         rand = random.random()
         x = function(**kwargs)
-        if rand < x:
-            # Success
-            return 1
-        else:
-            # Failure
-            return 0
+        return int(rand < x)
     return f
 
 
@@ -194,7 +189,7 @@ def process_datapoints(datapoints):
         - features
     """
     point_dict = {}
-    # Copy the datapoints
+
     ddata = [p for p in datapoints]
     for point in ddata:
         point_dict[hash_datapoint(point)] = {'results': [],
@@ -204,7 +199,6 @@ def process_datapoints(datapoints):
     for point in ddata:
         point_dict[hash_datapoint(point)]['results'].append(point['result'])
         point_dict[hash_datapoint(point)]['time'].append(point['time'])
-
 
     for e in point_dict:
         result_array = np.array(point_dict[e]['results'])

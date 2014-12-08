@@ -1,10 +1,10 @@
 from nose import with_setup
-import api
 import itertools
 import random
+
+import api
 import db
 import objective_functions
-import data_handling
 
 aztestname = 'test_api'
 
@@ -97,35 +97,3 @@ def test_add_points():
     add_points(az, number_points)
 
     assert len([p for p in db.get_datapoints(aztestname)]) == number_points
-
-
-@with_setup(setup_function, teardown_function)
-def test_get_graphs_results_after_adding_features():
-    number_features = random.randint(1, 10)
-    az = generate_aztest(number_features)
-    number_points = random.randint(1, 10)
-    add_points(az, number_points)
-
-    az.add_feature('other-feature', 'uniform')
-    schema = db.get_schema(aztestname)
-    features = schema['features']
-    datapoints = db.get_datapoints(aztestname)
-    data = data_handling.datapoints_to_graph_results(datapoints, features)
-
-    assert len(data) == number_features
-
-
-@with_setup(setup_function, teardown_function)
-def test_get_proj_results_after_adding_features():
-    number_features = random.randint(1, 10)
-    az = generate_aztest(number_features)
-    number_points = random.randint(1, 10)
-    add_points(az, number_points)
-
-    az.add_feature('other-feature', 'uniform')
-    schema = db.get_schema(aztestname)
-    features = schema['features']
-    datapoints = db.get_datapoints(aztestname)
-    data = data_handling.datapoints_to_graph_results(datapoints, features)
-
-    assert len(data) == number_features

@@ -31,10 +31,11 @@
 #     {"btn-color" 0, "font-size" 12 ...}
 #   - result: result of the A/B test: 0 or 1
 
+from pymongo import MongoClient
+
+import distributions
 import settings
 import utils
-from pymongo import MongoClient
-import distributions
 
 
 def init_db():
@@ -64,7 +65,8 @@ def drop_inndexes():
 
 
 def write_schema(uuid, features):
-    """Given an uuid and a sequence of features, it writes the schema in the db"""
+    """Given an uuid and a sequence of features,
+    it writes the schema in the db"""
     data = {'uuid': uuid, 'features': features}
     return db['schemas'].insert(data)
 
