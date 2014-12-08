@@ -1,5 +1,6 @@
 *.pyc
 __pycache__/
+logs/
 
 webapp/resources/public/js/compiled/
 *.js.map
