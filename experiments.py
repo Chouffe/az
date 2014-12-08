@@ -8,7 +8,8 @@ landing_page = {
     'uuid': 'demo1',
     'schema_uuid': 'lp',
     'objective_function': objective_functions.obj_function_landing_page,
-    'objective_function_draw': objective_functions.obj_function_landing_page_draw,
+    'objective_function_draw':
+    objective_functions.obj_function_landing_page_draw,
     'n_trials': 200,
     'n_points': 100,
     'az': True,
@@ -40,7 +41,8 @@ landing_page2 = {
     'uuid': 'demo2',
     'schema_uuid': 'lp2',
     'objective_function': objective_functions.obj_function_landing_page,
-    'objective_function_draw': objective_functions.obj_function_landing_page_draw,
+    'objective_function_draw':
+    objective_functions.obj_function_landing_page_draw,
     'n_trials': 200,
     'n_points': 100,
     'az': True,
@@ -163,13 +165,13 @@ def get_experiment_by_schema_uuid(schema_uuid):
     return None
 
 
-
 def run(data, f):
     """Runs f with data -  Return f(data)"""
 
     assert 'uuid' in data, "uuid not in data"
     assert 'schema_uuid' in data, "schema_uuid not in data"
-    assert 'objective_function_draw' in data, "objective_function_draw not in data"
+    assert 'objective_function_draw' in data, \
+           "objective_function_draw not in data"
     assert 'n_points' in data, "n_points not in data"
     assert 'n_trials' in data, "n_trials not in data"
     assert 'feature_names' in data, "feature_names not in data"
@@ -195,5 +197,3 @@ def run_demo(uuid):
             run(experiment, experiments_az.run_experiment)
         if experiment['ab']:
             run(experiment, experiments_ab.run_experiment)
-
-# run_demo('demo2')

@@ -198,7 +198,7 @@
            :width 500
            :height 400
            :lines (when @display-info-line? info-lines)
-           :xlabel "Draw #"
+           :xlabel "time"
            :ylabel (name ylabel)
            :path? true}]])))))
 

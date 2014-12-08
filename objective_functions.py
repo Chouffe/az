@@ -128,7 +128,7 @@ def obj_function_landing_page(background,
         / 120
 
 
-@noisy(sigma=.15)
+@noisy(sigma=0.001)
 def obj_function_landing_page_noisy(**kwargs):
     return obj_function_landing_page(**kwargs)
 

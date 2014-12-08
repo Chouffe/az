@@ -7,7 +7,6 @@ import data_handling
 import generator
 import requests
 import random
-import experiments
 
 app = flask.Flask(__name__, static_url_path='')
 
